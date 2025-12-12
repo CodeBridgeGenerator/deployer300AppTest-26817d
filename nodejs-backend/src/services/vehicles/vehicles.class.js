@@ -1,5 +1,3 @@
 const { Service } = require("feathers-mongoose");
 
-exports.Vehicles = class Vehicles extends Service {
-  
-};
+exports.Vehicles = class Vehicles extends Service {};

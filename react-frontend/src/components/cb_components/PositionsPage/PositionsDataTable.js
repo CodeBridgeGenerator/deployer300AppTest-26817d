@@ -273,8 +273,10 @@ const PositionsDataTable = ({
   useEffect(() => {
     const fetchFieldPermissions = async () => {
       try {
-        const userPermissions = await client.service("permissionFields").find({});
-        if(userPermissions?.data?.length === 0) return;
+        const userPermissions = await client
+          .service("permissionFields")
+          .find({});
+        if (userPermissions?.data?.length === 0) return;
         const filteredPermissions = userPermissions.data.filter(
           (perm) =>
             perm.servicePermissionId.roleId === selectedUser &&

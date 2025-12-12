@@ -9,14 +9,14 @@ import { Provider } from "react-redux";
 import * as models from "../../../models";
 
 test("renders superior page", async () => {
-    const store = init({ models });
-    render(
-        <Provider store={store}>
-            <MemoryRouter>
-                <SuperiorPage />
-            </MemoryRouter>
-        </Provider>
-    );
-    expect(screen.getByRole("superior-datatable")).toBeInTheDocument();
-    expect(screen.getByRole("superior-add-button")).toBeInTheDocument();
+  const store = init({ models });
+  render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <SuperiorPage />
+      </MemoryRouter>
+    </Provider>,
+  );
+  expect(screen.getByRole("superior-datatable")).toBeInTheDocument();
+  expect(screen.getByRole("superior-add-button")).toBeInTheDocument();
 });

@@ -26,5 +26,5 @@ module.exports = function (app) {
   app.configure(partsinventory);
   app.configure(suppliers);
   app.configure(paymentmethods);
-    // ~cb-add-configure-service-name~
+  // ~cb-add-configure-service-name~
 };

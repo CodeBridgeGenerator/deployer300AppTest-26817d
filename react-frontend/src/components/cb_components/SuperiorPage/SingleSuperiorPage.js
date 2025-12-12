@@ -128,7 +128,7 @@ const SingleSuperiorPage = (props) => {
               <h3 className="m-0">Superior</h3>
               <SplitButton
                 model={menuItems.filter(
-                  (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
+                  (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
                 )}
                 dropdownIcon="pi pi-ellipsis-h"
                 buttonClassName="hidden"
@@ -178,7 +178,7 @@ const SingleSuperiorPage = (props) => {
           id="rightsidebar"
           className={classNames(
             "overlay-auto z-1 surface-overlay shadow-2 absolute right-0 w-20rem animation-duration-150 animation-ease-in-out",
-            { hidden: !isHelpSidebarVisible }
+            { hidden: !isHelpSidebarVisible },
           )}
           style={{ top: "60px", height: "calc(100% - 60px)" }}
         >

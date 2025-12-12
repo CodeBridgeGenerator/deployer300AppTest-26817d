@@ -13,7 +13,7 @@ module.exports = (app) => {
 };
 
 const initializeSuperUser = async (app) => {
-  const userEmail = ['kana@cloudbasha.com'];
+  const userEmail = ["kana@cloudbasha.com"];
   try {
     let getUserEmail = await app.service("userInvites").find({
       query: {
@@ -35,7 +35,7 @@ const initializeSuperUser = async (app) => {
           role: "67435a2c6521f76d8ac46f33",
         })),
       );
-    } 
+    }
   } catch (error) {
     console.error("Error initializing super user:", error.message);
   }

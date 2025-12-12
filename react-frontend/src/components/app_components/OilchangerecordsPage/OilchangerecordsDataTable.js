@@ -1,12 +1,12 @@
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import React, { useState, useRef, useEffect} from 'react';
-import _ from 'lodash';
-import { Button } from 'primereact/button';
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import React, { useState, useRef, useEffect } from "react";
+import _ from "lodash";
+import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
 import moment from "moment";
 import UploadService from "../../../services/UploadService";
-import { InputText } from 'primereact/inputtext';
+import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
 import DownloadCSV from "../../../utils/DownloadCSV";
@@ -18,29 +18,69 @@ import DuplicateIcon from "../../../assets/media/Duplicate.png";
 import DeleteIcon from "../../../assets/media/Trash.png";
 import { Checkbox } from "primereact/checkbox";
 
-const OilchangerecordsDataTable = ({ items, fields, onEditRow, onRowDelete, onRowClick, searchDialog, setSearchDialog,   showUpload, setShowUpload,
-    showFilter, setShowFilter,
-    showColumns, setShowColumns, onClickSaveFilteredfields ,
-    selectedFilterFields, setSelectedFilterFields,
-    selectedHideFields, setSelectedHideFields, onClickSaveHiddenfields, loading, user,   selectedDelete,
-  setSelectedDelete, onCreateResult}) => {
-    const dt = useRef(null);
-    const urlParams = useParams();
-    const [globalFilter, setGlobalFilter] = useState('');
+const OilchangerecordsDataTable = ({
+  items,
+  fields,
+  onEditRow,
+  onRowDelete,
+  onRowClick,
+  searchDialog,
+  setSearchDialog,
+  showUpload,
+  setShowUpload,
+  showFilter,
+  setShowFilter,
+  showColumns,
+  setShowColumns,
+  onClickSaveFilteredfields,
+  selectedFilterFields,
+  setSelectedFilterFields,
+  selectedHideFields,
+  setSelectedHideFields,
+  onClickSaveHiddenfields,
+  loading,
+  user,
+  selectedDelete,
+  setSelectedDelete,
+  onCreateResult,
+}) => {
+  const dt = useRef(null);
+  const urlParams = useParams();
+  const [globalFilter, setGlobalFilter] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [data, setData] = useState([]);
 
-const p_numberTemplate0 = (rowData, { rowIndex }) => <p >{rowData.vehicleId}</p>
-const p_numberTemplate1 = (rowData, { rowIndex }) => <p >{rowData.serviceRecordId}</p>
-const pTemplate2 = (rowData, { rowIndex }) => <p >{rowData.oilType}</p>
-const p_numberTemplate3 = (rowData, { rowIndex }) => <p >{rowData.mileage}</p>
-const p_numberTemplate4 = (rowData, { rowIndex }) => <p >{rowData.technicianId}</p>
-const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}</p>
-    const editTemplate = (rowData, { rowIndex }) => <Button onClick={() => onEditRow(rowData, rowIndex)} icon={`pi ${rowData.isEdit ? "pi-check" : "pi-pencil"}`} className={`p-button-rounded p-button-text ${rowData.isEdit ? "p-button-success" : "p-button-warning"}`} />;
-    const deleteTemplate = (rowData, { rowIndex }) => <Button onClick={() => onRowDelete(rowData._id)} icon="pi pi-times" className="p-button-rounded p-button-danger p-button-text" />;
-    
-      const checkboxTemplate = (rowData) => (
+  const p_numberTemplate0 = (rowData, { rowIndex }) => (
+    <p>{rowData.vehicleId}</p>
+  );
+  const p_numberTemplate1 = (rowData, { rowIndex }) => (
+    <p>{rowData.serviceRecordId}</p>
+  );
+  const pTemplate2 = (rowData, { rowIndex }) => <p>{rowData.oilType}</p>;
+  const p_numberTemplate3 = (rowData, { rowIndex }) => <p>{rowData.mileage}</p>;
+  const p_numberTemplate4 = (rowData, { rowIndex }) => (
+    <p>{rowData.technicianId}</p>
+  );
+  const p_numberTemplate5 = (rowData, { rowIndex }) => (
+    <p>{rowData.dateOfChange}</p>
+  );
+  const editTemplate = (rowData, { rowIndex }) => (
+    <Button
+      onClick={() => onEditRow(rowData, rowIndex)}
+      icon={`pi ${rowData.isEdit ? "pi-check" : "pi-pencil"}`}
+      className={`p-button-rounded p-button-text ${rowData.isEdit ? "p-button-success" : "p-button-warning"}`}
+    />
+  );
+  const deleteTemplate = (rowData, { rowIndex }) => (
+    <Button
+      onClick={() => onRowDelete(rowData._id)}
+      icon="pi pi-times"
+      className="p-button-rounded p-button-danger p-button-text"
+    />
+  );
+
+  const checkboxTemplate = (rowData) => (
     <Checkbox
       checked={selectedItems.some((item) => item._id === rowData._id)}
       onChange={(e) => {
@@ -81,7 +121,7 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
       console.error("Failed to delete selected records", error);
     }
   };
-    
+
   const handleMessage = () => {
     setShowDialog(true); // Open the dialog
   };
@@ -90,10 +130,10 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
     setShowDialog(false); // Close the dialog
   };
 
-    return (
-        <>
-        <DataTable 
-           value={items}
+  return (
+    <>
+      <DataTable
+        value={items}
         ref={dt}
         removableSort
         onRowClick={onRowClick}
@@ -111,23 +151,69 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
         selection={selectedItems}
         onSelectionChange={(e) => setSelectedItems(e.value)}
         onCreateResult={onCreateResult}
-        >
-                <Column
+      >
+        <Column
           selectionMode="multiple"
           headerStyle={{ width: "3rem" }}
           body={checkboxTemplate}
         />
-<Column field="vehicleId" header="VehicleID" body={p_numberTemplate0} filter={selectedFilterFields.includes("vehicleId")} hidden={selectedHideFields?.includes("vehicleId")}  sortable style={{ minWidth: "8rem" }} />
-<Column field="serviceRecordId" header="ServiceRecordID" body={p_numberTemplate1} filter={selectedFilterFields.includes("serviceRecordId")} hidden={selectedHideFields?.includes("serviceRecordId")}  sortable style={{ minWidth: "8rem" }} />
-<Column field="oilType" header="OilType" body={pTemplate2} filter={selectedFilterFields.includes("oilType")} hidden={selectedHideFields?.includes("oilType")}  sortable style={{ minWidth: "8rem" }} />
-<Column field="mileage" header="Mileage" body={p_numberTemplate3} filter={selectedFilterFields.includes("mileage")} hidden={selectedHideFields?.includes("mileage")}  sortable style={{ minWidth: "8rem" }} />
-<Column field="technicianId" header="TechnicianID" body={p_numberTemplate4} filter={selectedFilterFields.includes("technicianId")} hidden={selectedHideFields?.includes("technicianId")}  sortable style={{ minWidth: "8rem" }} />
-<Column field="dateOfChange" header="DateOfChange" body={p_numberTemplate5} filter={selectedFilterFields.includes("dateOfChange")} hidden={selectedHideFields?.includes("dateOfChange")}  sortable style={{ minWidth: "8rem" }} />
-            <Column header="Edit" body={editTemplate} />
-            <Column header="Delete" body={deleteTemplate} />
-            
-        </DataTable>
-
+        <Column
+          field="vehicleId"
+          header="VehicleID"
+          body={p_numberTemplate0}
+          filter={selectedFilterFields.includes("vehicleId")}
+          hidden={selectedHideFields?.includes("vehicleId")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column
+          field="serviceRecordId"
+          header="ServiceRecordID"
+          body={p_numberTemplate1}
+          filter={selectedFilterFields.includes("serviceRecordId")}
+          hidden={selectedHideFields?.includes("serviceRecordId")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column
+          field="oilType"
+          header="OilType"
+          body={pTemplate2}
+          filter={selectedFilterFields.includes("oilType")}
+          hidden={selectedHideFields?.includes("oilType")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column
+          field="mileage"
+          header="Mileage"
+          body={p_numberTemplate3}
+          filter={selectedFilterFields.includes("mileage")}
+          hidden={selectedHideFields?.includes("mileage")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column
+          field="technicianId"
+          header="TechnicianID"
+          body={p_numberTemplate4}
+          filter={selectedFilterFields.includes("technicianId")}
+          hidden={selectedHideFields?.includes("technicianId")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column
+          field="dateOfChange"
+          header="DateOfChange"
+          body={p_numberTemplate5}
+          filter={selectedFilterFields.includes("dateOfChange")}
+          hidden={selectedHideFields?.includes("dateOfChange")}
+          sortable
+          style={{ minWidth: "8rem" }}
+        />
+        <Column header="Edit" body={editTemplate} />
+        <Column header="Delete" body={deleteTemplate} />
+      </DataTable>
 
       {selectedItems.length > 0 ? (
         <div
@@ -303,20 +389,28 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
         </div>
       ) : null}
 
-
-        <Dialog header="Upload Oilchangerecords Data" visible={showUpload} onHide={() => setShowUpload(false)}>
-        <UploadService 
-          user={user} 
-          serviceName="oilchangerecords"            
+      <Dialog
+        header="Upload Oilchangerecords Data"
+        visible={showUpload}
+        onHide={() => setShowUpload(false)}
+      >
+        <UploadService
+          user={user}
+          serviceName="oilchangerecords"
           onUploadComplete={() => {
             setShowUpload(false); // Close the dialog after upload
-          }}/>
+          }}
+        />
       </Dialog>
 
-      <Dialog header="Search Oilchangerecords" visible={searchDialog} onHide={() => setSearchDialog(false)}>
-      Search
-    </Dialog>
-    <Dialog
+      <Dialog
+        header="Search Oilchangerecords"
+        visible={searchDialog}
+        onHide={() => setSearchDialog(false)}
+      >
+        Search
+      </Dialog>
+      <Dialog
         header="Filter Users"
         visible={showFilter}
         onHide={() => setShowFilter(false)}
@@ -341,7 +435,7 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
             console.log(selectedFilterFields);
             onClickSaveFilteredfields(selectedFilterFields);
             setSelectedFilterFields(selectedFilterFields);
-            setShowFilter(false)
+            setShowFilter(false);
           }}
         ></Button>
       </Dialog>
@@ -371,12 +465,12 @@ const p_numberTemplate5 = (rowData, { rowIndex }) => <p >{rowData.dateOfChange}<
             console.log(selectedHideFields);
             onClickSaveHiddenfields(selectedHideFields);
             setSelectedHideFields(selectedHideFields);
-            setShowColumns(false)
+            setShowColumns(false);
           }}
         ></Button>
       </Dialog>
-        </>
-    );
+    </>
+  );
 };
 
 export default OilchangerecordsDataTable;

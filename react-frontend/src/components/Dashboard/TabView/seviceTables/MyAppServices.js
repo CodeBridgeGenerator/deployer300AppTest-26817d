@@ -51,7 +51,6 @@ const AdminServices = (props) => {
     fetchData();
   }, [activeIndex, props]);
 
-
   return (
     <TabView
       activeIndex={activeIndex}

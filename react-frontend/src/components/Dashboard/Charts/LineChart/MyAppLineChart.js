@@ -14,9 +14,7 @@ export default function TicketsCreatedLineChart(props) {
     setLoading(true);
 
     // Services to fetch ticket data
-    const services = [
-
-    ];
+    const services = [];
     const colors = ["--blue-500", "--green-500", "--orange-500"];
 
     const fetchPromises = services.map((service) =>

@@ -320,7 +320,6 @@ const LoginPage = (props) => {
                 >
                   Forgot your password?
                 </p>
-                
               </div>
             </div>
             <div className="mt-7">

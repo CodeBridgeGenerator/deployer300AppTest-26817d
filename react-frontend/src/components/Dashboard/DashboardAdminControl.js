@@ -29,7 +29,7 @@ const DashboardAdminControl = (props) => {
         const { profiles = [], selectedUser } = response.results || {};
 
         const selectedProfile = profiles.find(
-          (profile) => profile.profileId === selectedUser
+          (profile) => profile.profileId === selectedUser,
         );
 
         if (selectedProfile?.preferences) {
@@ -40,7 +40,7 @@ const DashboardAdminControl = (props) => {
             .filter(
               (item, index, self) =>
                 self.findIndex((i) => i.url === item.url) === index &&
-                item.mainMenu === "admin"
+                item.mainMenu === "admin",
             )
             .slice(0, 3)
             .map((item) => ({

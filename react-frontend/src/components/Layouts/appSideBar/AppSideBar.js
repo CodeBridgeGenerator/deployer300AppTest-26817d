@@ -57,7 +57,7 @@ const AppSideBar = (props) => {
       <div
         className={classNames(
           "duration-300 flex-shrink-0",
-          open ? "w-[280px]" : "w-[calc(3rem+20px)]"
+          open ? "w-[280px]" : "w-[calc(3rem+20px)]",
         )}
       ></div>
       <AppSideBarProvider
@@ -71,7 +71,7 @@ const AppSideBar = (props) => {
         <div
           className={classNames(
             "fixed z-[100] flex flex-col top-20 left-0 h-[calc(100vh-5rem)] overflow-y-hidden overflow-x-hidden  flex-shrink-0 shadow bg-[#F8F9FA] border-r border-[#DEE2E6] border-solid duration-300",
-            open ? "w-[280px]" : "w-[calc(3rem+20px)]"
+            open ? "w-[280px]" : "w-[calc(3rem+20px)]",
           )}
         >
           <div className="flex-grow gap-1 p-2 overflow-x-hidden overflow-y-auto no-scrollbar">
@@ -86,74 +86,73 @@ const AppSideBar = (props) => {
               menuKey="dashboard"
               to="/cbAdmin/dashboard"
               menus={[
-                
-{
+                {
                   icon: <Home />,
                   label: "Customers",
                   menuKey: "customers",
                   to: "/app/customers",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Vehicles",
                   menuKey: "vehicles",
                   to: "/app/vehicles",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Loyaltyprograms",
                   menuKey: "loyaltyprograms",
                   to: "/app/loyaltyprograms",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Invoices",
                   menuKey: "invoices",
                   to: "/app/invoices",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Services",
                   menuKey: "services",
                   to: "/app/services",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Servicerecords",
                   menuKey: "servicerecords",
                   to: "/app/servicerecords",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Maintenanceschedules",
                   menuKey: "maintenanceschedules",
                   to: "/app/maintenanceschedules",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Oilchangerecords",
                   menuKey: "oilchangerecords",
                   to: "/app/oilchangerecords",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Technicians",
                   menuKey: "technicians",
                   to: "/app/technicians",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Partsinventory",
                   menuKey: "partsinventory",
                   to: "/app/partsinventory",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Suppliers",
                   menuKey: "suppliers",
                   to: "/app/suppliers",
                 },
-{
+                {
                   icon: <Home />,
                   label: "Paymentmethods",
                   menuKey: "paymentmethods",
@@ -436,7 +435,7 @@ const AppSideBar = (props) => {
           <div
             className={classNames(
               "text-center duration-300",
-              open ? "opacity-100" : "opacity-0"
+              open ? "opacity-100" : "opacity-0",
             )}
           >
             <AppFooter />

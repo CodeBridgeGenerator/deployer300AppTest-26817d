@@ -11,10 +11,8 @@ export default function TicketStatusBarChart(props) {
 
   useEffect(() => {
     setLoading(true);
-    const serviceColors = {
-    };
-    const ticketServices = [
-    ];
+    const serviceColors = {};
+    const ticketServices = [];
     const statusValues = ["Open", "In-Progress", "Closed"];
 
     const fetchTicketData = async () => {
