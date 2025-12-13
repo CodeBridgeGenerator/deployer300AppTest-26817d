@@ -1,6 +1,7 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import React, { useState, useRef, useEffect } from "react";
+import { connect } from "react-redux";
 import _ from "lodash";
 import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
@@ -20,7 +21,6 @@ import { Toast } from "primereact/toast";
 import DeleteImage from "../../../assets/media/Delete.png";
 import client from "../../../services/restClient";
 import { Dropdown } from "primereact/dropdown";
-import { connect } from "react-redux";
 import { Skeleton } from "primereact/skeleton";
 import { Checkbox } from "primereact/checkbox";
 
@@ -225,12 +225,7 @@ const SectionsDataTable = ({
       try {
         if (selectedUser) {
           const profile = await client.service("profiles").get(selectedUser);
-          const sectionsPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "sections" },
-            });
-
+          const sectionsPermissions = _.filter(props.permServices,{service : "sections"});
           let userPermissions = null;
 
           // Priority 1: Profile
@@ -825,4 +820,15 @@ const SectionsDataTable = ({
     </>
   );
 };
-export default SectionsDataTable;
+const mapState = (state) => {
+  const { user, isLoggedIn } = state.auth;
+  const { permFields, permServices } = state.perms;
+  return { user, isLoggedIn , permFields, permServices};
+};
+
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+});
+
+export default connect(mapState, mapDispatch)(SectionsDataTable);
+

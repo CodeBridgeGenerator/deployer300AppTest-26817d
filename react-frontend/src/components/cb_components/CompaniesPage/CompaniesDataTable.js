@@ -1,6 +1,7 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import React, { useState, useRef, useEffect } from "react";
+import { connect } from "react-redux";
 import _ from "lodash";
 import client from "../../../services/restClient";
 import { Button } from "primereact/button";
@@ -19,7 +20,6 @@ import DeleteIcon from "../../../assets/media/Trash.png";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import DeleteImage from "../../../assets/media/Delete.png";
-import { connect } from "react-redux";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { Checkbox } from "primereact/checkbox";
@@ -879,7 +879,8 @@ const CompaniesDataTable = ({
 
 const mapState = (state) => {
   const { user, isLoggedIn } = state.auth;
-  return { user, isLoggedIn };
+  const { permissions, profilePermissions } = state.perms;
+  return { user, isLoggedIn, permissions };
 };
 
 const mapDispatch = (dispatch) => ({

@@ -314,12 +314,7 @@ const BranchesDataTable = ({
       try {
         if (selectedUser) {
           const profile = await client.service("profiles").get(selectedUser);
-          const companyPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "branches" },
-            });
-
+          const companyPermissions = _.filter(props.permFields, { service: "companies" });
           let userPermissions = null;
 
           // Priority 1: Profile
@@ -788,6 +783,18 @@ const BranchesDataTable = ({
       )}
     </>
   );
+}
+
+
+const mapState = (state) => {
+  const { user, isLoggedIn } = state.auth;
+  const { permFields, permServices } = state.perms;
+  return { user, isLoggedIn , permFields, permServices};
 };
 
-export default BranchesDataTable;
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+});
+
+export default connect(mapState, mapDispatch)(BranchesDataTable);
+

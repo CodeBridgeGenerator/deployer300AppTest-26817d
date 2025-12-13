@@ -46,6 +46,8 @@ export default function UserProfilesBarChart(props) {
         const usersResponse = await client.service("users").find({
           query: { _id: { $in: createdByIds } },
         });
+
+        if(usersResponse.data?.length === 0) return;
         const users = usersResponse.data;
         // console.debug("Users Response:", users);
 

@@ -166,7 +166,7 @@ const AppSideBar = (props) => {
               icon={<Admin />}
               label="People"
               menuKey="hr-controls"
-              to="/cbAdmin/DashboardAdminControl"
+              to="/cbAdmin/DashboardHRControls"
               menus={[
                 {
                   label: "Roles",

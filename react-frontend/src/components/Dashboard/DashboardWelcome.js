@@ -27,6 +27,11 @@ const DashboardWelcome = (props) => {
     };
   }, [isHelpSidebarVisible]);
 
+  useEffect(() => {
+    props.getPermissionFields();
+    props.getPermissionServices();
+  },[])
+
   const toggleHelpSidebar = () => {
     setHelpSidebarVisible(!isHelpSidebarVisible);
   };
@@ -123,4 +128,11 @@ const mapState = (state) => {
   return { user, isLoggedIn };
 };
 
-export default connect(mapState)(DashboardWelcome);
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+  getPermissionFields: () => dispatch.perms.getPermissionFields(),
+  getPermissionServices: () => dispatch.perms.getPermissionServices(),
+});
+
+
+export default connect(mapState, mapDispatch)(DashboardWelcome);

@@ -1,3 +1,5 @@
 const { Service } = require("feathers-mongoose");
+const FindService = require("../../utils/abstracts/FindService");
+const MixedService = FindService(Service);
 
-exports.Partsinventory = class Partsinventory extends Service {};
+exports.Partsinventory = class Partsinventory extends MixedService {};

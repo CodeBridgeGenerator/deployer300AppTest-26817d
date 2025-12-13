@@ -109,6 +109,7 @@ module.exports = function (app) {
     {
       timestamps: true,
     },
+    { strictPopulate: false }
   );
 
   if (mongooseClient.modelNames().includes(modelName)) {

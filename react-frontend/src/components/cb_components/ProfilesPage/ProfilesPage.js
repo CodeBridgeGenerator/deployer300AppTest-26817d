@@ -196,7 +196,7 @@ const ProfilesPage = (props) => {
       })
       .then((res) => {
         let results = res.data;
-        console.log(results);
+        // console.debug(results);
         setData(results);
         props.hide();
         setLoading(false);
@@ -485,7 +485,7 @@ const ProfilesPage = (props) => {
           10,
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
-        console.log("PaginatorRecordsNo from cache:", paginatorRecordsNo);
+        // console.debug("PaginatorRecordsNo from cache:", paginatorRecordsNo);
         return;
       }
     }
@@ -502,7 +502,7 @@ const ProfilesPage = (props) => {
         10,
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
-      console.log("PaginatorRecordsNo from service:", paginatorRecordsNo);
+      // console.debug("PaginatorRecordsNo from service:", paginatorRecordsNo);
     } catch (error) {
       console.error("Error fetching profile from profiles service:", error);
     }
@@ -549,7 +549,7 @@ const ProfilesPage = (props) => {
             .find({
               query: { service: "profiles" },
             });
-          console.log("companyPermissions", companyPermissions);
+          // console.debug("companyPermissions", companyPermissions);
           let userPermissions = null;
 
           // Priority 1: Profile
@@ -573,9 +573,9 @@ const ProfilesPage = (props) => {
 
           if (userPermissions) {
             setPermissions(userPermissions);
-            console.log("userPermissions", userPermissions);
+            console.debug("userPermissions", userPermissions);
           } else {
-            console.log("No permissions found for this user and service.");
+            console.debug("No permissions found for this user and service.");
           }
         }
       } catch (error) {

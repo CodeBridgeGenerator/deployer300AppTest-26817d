@@ -49,15 +49,15 @@ const PinnedItems = (props) => {
 
       {showCard && <PopupCard />}
 
-      <div className="text-600 font-medium mt-3">
+      <div className="text-600 font-medium m-0 p-0">
         {pinnedItems.map((item, index) => (
           <div
-            className="flex items-center text-sm p-1 cursor-pointer"
+            className="flex items-center text-sm p-0"
             key={index}
             style={{
               paddingLeft: "1rem",
               paddingRight: "1rem",
-              marginBottom: "0.5rem",
+              marginBottom: "0.1rem",
             }}
             onClick={() => handleItemClick(item.url)}
           >
@@ -70,7 +70,7 @@ const PinnedItems = (props) => {
               <span className="text-xs">{item.text}</span>
             </div>
             {item.subtext && (
-              <div className="flex items-center ml-2">
+              <div className="flex items-center ml-1">
                 <span className="mx-2">•</span>
                 <span className="text-xs text-gray-600">{item.subtext}</span>
               </div>

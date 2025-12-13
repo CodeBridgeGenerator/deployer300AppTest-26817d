@@ -7,95 +7,265 @@ import LineChart from "./Charts/LineChart/PeopleLineChart";
 import CompanyBarChart from "./Charts/BarChart/PeopleBarChart";
 import PeopleServices from "./TabView/seviceTables/PeopleServices";
 import ChartPopup from "./PopUpComp/ChartPopup";
-import ProjectSideBarLayout from "../Layouts/ProjectSideBarLayout";
+import ProjectLayout from "../Layouts/ProjectLayout";
 import client from "../../services/restClient";
 import { classNames } from "primereact/utils";
 import Report from "../../assets/icons/Report";
 import PopupCard from "./PopUpComp/PopupCard";
+import moment from "moment";
+import "./Dashboards.css";
 
 const DashboardHRControls = (props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [showCard, setShowCard] = useState(false);
   const [showDash, setShowDash] = useState(false);
-  const [totalCompanies, setTotalCompanies] = useState(0);
+  const [showDates, setStartEndDates] = useState({});
+  const [total, setTotal] = useState(0);
   const [recentItems, setRecentItems] = useState([]);
   const [pinnedItems, setPinnedItems] = useState([]);
 
-  useEffect(() => {
-    const fetchCache = async () => {
-      try {
-        const response = await props.get();
-        const { profiles = [], selectedUser } = response.results || {};
+  const fetchCache = async () => {
+    try {
+      const response = await props.get();
+      const { profiles = [], selectedUser } = response.results || {};
 
-        const selectedProfile = profiles.find(
-          (profile) => profile.profileId === selectedUser,
-        );
+      const selectedProfile = profiles.find(
+        (profile) => profile.profileId === selectedUser
+      );
 
-        if (selectedProfile?.preferences) {
-          const { recent = [], favourites = [] } = selectedProfile.preferences;
+      if (selectedProfile?.preferences) {
+        const { recent = [], favourites = [] } = selectedProfile.preferences;
 
-          const uniqueRecentItems = recent
-            .reverse()
-            .filter(
-              (item, index, self) =>
-                self.findIndex((i) => i.url === item.url) === index &&
-                item.mainMenu === "people",
-            )
-            .slice(0, 3)
-            .map((item) => ({
-              text: item.label,
-              subtext: item.name,
-              src: item.icon,
-              url: item.url,
-            }));
+        const uniqueRecentItems = recent
+          .reverse()
+          .filter(
+            (item, index, self) =>
+              self.findIndex((i) => i.url === item.url) === index &&
+              item.mainMenu === "people"
+          )
+          .slice(0, 3)
+          .map((item) => ({
+            text: item.label,
+            subtext: item.name,
+            src: item.icon,
+            url: item.url,
+          }));
 
-          setRecentItems(uniqueRecentItems);
+        setRecentItems(uniqueRecentItems);
 
-          const filteredPinnedItems = favourites
-            .filter((item) => item.mainMenu === "people")
-            .slice(-3)
-            .map((item) => ({
-              text: item.label,
-              subtext: item.mainMenu,
-              src: item.icon,
-              url: item.url,
-            }));
+        const filteredPinnedItems = favourites
+          .filter((item) => item.mainMenu === "people")
+          .slice(-3)
+          .map((item) => ({
+            text: item.label,
+            subtext: item.mainMenu,
+            src: item.icon,
+            url: item.url,
+          }));
 
-          setPinnedItems(filteredPinnedItems);
-        }
-      } catch (error) {
-        console.error("Failed to fetch cache:", error);
+        setPinnedItems(filteredPinnedItems);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch cache:", error);
+    }
+  };
 
-    fetchCache();
-  }, [props.get]);
+  const fetchTotal = async () => {
+    try {
+      const { total } = await client.service("profiles").find({
+        query: {
+          $limit: 0,
+        },
+      });
 
-  useEffect(() => {
-    const fetchTotalCompanies = async () => {
-      try {
-        const { total } = await client.service("roles").find({
-          query: {
-            $limit: 0,
+      setTotal(total);
+    } catch (error) {
+      console.error("Failed to fetch companies:", error);
+      props.alert({
+        title: "Companies",
+        type: "error",
+        message: error.message || "Failed to get Companies",
+      });
+    }
+  };
+
+  const fetchRecentItems = async () => {
+    try {
+      const toDateAgo = new Date();
+      const fromDateAgo = new Date();
+      fromDateAgo.setDate(toDateAgo.getDate() - 20);
+      setStartEndDates({ from: fromDateAgo, to: toDateAgo });
+      console.log(toDateAgo, fromDateAgo);
+
+      const count = await client.service("loginHistory").find({
+        query: {
+          createdAt: {
+            $lte: toDateAgo,
+            $gte: fromDateAgo,
           },
-        });
+          $populate: [
+            {
+              path: "userId",
+              service: "users",
+              select: ["name", "email"],
+            },
+          ],
+        },
+      });
 
-        setTotalCompanies(total);
-      } catch (error) {
-        console.error("Failed to fetch companies:", error);
-        props.alert({
-          title: "Companies",
-          type: "error",
-          message: error.message || "Failed to get Companies",
-        });
+      const sorted = count.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      // Step 2: Filter unique users by userId._id
+      const uniqueUsersMap = new Map();
+      for (const item of sorted) {
+        if (!uniqueUsersMap.has(item.userId._id)) {
+          const { data } = await client.service("profiles").find({
+            query: {
+              userId: item.userId._id,
+              $populate: [
+                {
+                  path: "role",
+                  service: "roles",
+                  select: ["name"],
+                },
+                {
+                  path: "branch",
+                  service: "branches",
+                  select: ["name"],
+                },
+                {
+                  path: "company",
+                  service: "companies",
+                  select: ["name"],
+                },
+                {
+                  path: "position",
+                  service: "positions",
+                  select: ["name"],
+                },
+              ],
+            },
+          });
+          if (data[0]?.role?.name === "Staff") {
+            uniqueUsersMap.set(item.userId._id, {
+              name: item.userId.name,
+              ...data[0],
+            });
+          }
+        }
       }
-    };
 
-    fetchTotalCompanies();
+      const bottom5Users = Array.from(uniqueUsersMap.values()).slice(-5);
+      const mapItems = bottom5Users.map((e) => {
+        return { subtext: e.name };
+      });
+      // console.log("length", len);
+      // console.log(bottom5Users, mapItems);
+      setRecentItems(mapItems);
+    } catch (error) {
+      console.error("Failed to fetch recent items:", error);
+      props.alert({
+        title: "Roles",
+        type: "error",
+        message: error.message || "Failed to get Companies",
+      });
+    }
+  };
+
+  const fetchFrequentItems = async () => {
+    try {
+      const toDateAgo = new Date();
+      const fromDateAgo = new Date();
+      fromDateAgo.setDate(toDateAgo.getDate() - 20);
+      console.log(toDateAgo, fromDateAgo);
+
+      const count = await client.service("loginHistory").find({
+        query: {
+          createdAt: {
+            $lte: toDateAgo,
+            $gte: fromDateAgo,
+          },
+          $populate: [
+            {
+              path: "userId",
+              service: "users",
+              select: ["name", "email"],
+            },
+          ],
+        },
+      });
+
+      const sorted = count.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      // Step 2: Filter unique users by userId._id
+      const uniqueUsersMap = new Map();
+      for (const item of sorted) {
+        if (!uniqueUsersMap.has(item.userId._id)) {
+          const { data } = await client.service("profiles").find({
+            query: {
+              userId: item.userId._id,
+              $populate: [
+                {
+                  path: "role",
+                  service: "roles",
+                  select: ["name"],
+                },
+                {
+                  path: "branch",
+                  service: "branches",
+                  select: ["name"],
+                },
+                {
+                  path: "company",
+                  service: "companies",
+                  select: ["name"],
+                },
+                {
+                  path: "position",
+                  service: "positions",
+                  select: ["name"],
+                },
+              ],
+            },
+          });
+          if (data[0]?.role?.name === "Staff") {
+            uniqueUsersMap.set(item.userId._id, {
+              name: item.userId.name,
+              ...data[0],
+            });
+          }
+        }
+      }
+
+      // Step 3: Get top 5 most recent unique users
+      const top5Users = Array.from(uniqueUsersMap.values()).slice(0, 5);
+      const mapItems = top5Users.map((e) => {
+        return { subtext: e.name };
+      });
+      // console.log(mapItems);
+      setPinnedItems(mapItems);
+    } catch (error) {
+      console.error("Failed to fav items:", error);
+      props.alert({
+        title: "Login History",
+        type: "error",
+        message: error.message || "Failed to get fav",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentItems();
+    fetchFrequentItems();
+    fetchTotal();
   }, []);
 
   return (
-    <ProjectSideBarLayout>
+    <ProjectLayout>
       <div className="p-2 md:p-4">
         {/* Title and Edit section */}
         <div className="mb-2 flex justify-content-between align-items-center">
@@ -127,10 +297,21 @@ const DashboardHRControls = (props) => {
           })}
         >
           <div className="grid">
+            {showDates?.from && (
+              <>
+                <div className="col-12 flex justify-content-between align-items-center ">
+                  <span className="text-sm text-600">
+                    Since {moment(showDates?.from).fromNow()}
+                  </span>
+                
+                  <span className=" text-sm text-600">All Time </span>
+                </div>
+              </>
+            )}
             {/* Recent Component */}
             <div className="col-12 md:col-4 mb-3">
               <RecentComp
-                title={"Recent"}
+                title={"Least Logins"}
                 isEdit={isEdit}
                 recentItems={recentItems}
               />
@@ -148,9 +329,9 @@ const DashboardHRControls = (props) => {
             {/* Total Component */}
             <div className="col-12 md:col-4">
               <TotalComponent
-                TotalComp={"Total Roles"}
+                TotalComp={"Total Profiles"}
                 isEdit={isEdit}
-                total={totalCompanies}
+                total={total}
               />
             </div>
           </div>
@@ -184,7 +365,7 @@ const DashboardHRControls = (props) => {
           <PeopleServices />
         </div>
       </div>
-    </ProjectSideBarLayout>
+    </ProjectLayout>
   );
 };
 

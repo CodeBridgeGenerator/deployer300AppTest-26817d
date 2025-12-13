@@ -1,6 +1,7 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import React, { useState, useRef, useEffect } from "react";
+import { connect } from "react-redux";
 import _ from "lodash";
 import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
@@ -876,4 +877,16 @@ const CompanyAddressesDataTable = ({
   );
 };
 
-export default CompanyAddressesDataTable;
+
+const mapState = (state) => {
+  const { user, isLoggedIn } = state.auth;
+  const { permFields, permServices } = state.perms;
+  return { user, isLoggedIn , permFields, permServices};
+};
+
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+});
+
+export default connect(mapState, mapDispatch)(CompanyAddressesDataTable);
+
