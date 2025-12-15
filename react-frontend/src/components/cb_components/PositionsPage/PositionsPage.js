@@ -46,8 +46,9 @@ const PositionsPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);  
-const [permissions, setPermissions] = useState({});  const [selectedUser, setSelectedUser] = useState();
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [selectedUser, setSelectedUser] = useState();
 
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
@@ -405,7 +406,7 @@ const [permissions, setPermissions] = useState({});  const [selectedUser, setSel
   useEffect(() => {
     get();
   }, []);
-  props.hasServicePermission(filename).then(setPermissions);
+
   const get = async () => {
     const tabId = getOrSetTabId();
     const response = await props.get();

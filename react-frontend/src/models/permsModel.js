@@ -3,7 +3,6 @@ import client from "../services/restClient";
 
 export const perms = {
   state: {
-    profile: {},
     permFields: [],
     permServices: [],
   }, // initial state
@@ -17,25 +16,8 @@ export const perms = {
       let toReturn = { ...state, permServices };
       return toReturn;
     },
-    setProfile(state, profile) {
-      let toReturn = { ...state, profile };
-      return toReturn;
-    },
-    // get Profile
-
-    // has Role
-    // has Position
-    // has Company
-    // has Branch
-    // has UserId
-    // has Permission
   },
   effects: (dispatch) => ({
-    setProfile(_, reduxState) {
-      const response = dispatch.cache.getCache();
-      console.log("Getting cache results:", response.results);
-      this.setProfile(response.results.selectedUser);
-    },
     ////////////////////////////////////
     //// GET ALL PERMISSION FIELDS /////
     ////////////////////////////////////
@@ -69,7 +51,7 @@ export const perms = {
           return data;
         })
         .catch((err) => {
-          console.log(err);
+          console.error(err);
           return { ...err };
         });
     },
@@ -78,8 +60,7 @@ export const perms = {
         const response = await dispatch.cache.get();
         const profileId = response.results.selectedUser;
         const profile = await client.service("profiles").get(profileId);
-        console.log("Getting cache results:", response.results.selectedUser);
-        console.log("User profile:", profile);
+        
         const adminProfiles = [
           "66e678d947480b243fc573fd",
           "67435a2c6521f76d8ac46f33",
@@ -104,20 +85,17 @@ export const perms = {
         if (Array.isArray(permissionServiceData) && permissionServiceData.length > 0) {
           permissionService = permissionServiceData[0];
         }
-        console.log("Permission Service:", permissionServiceData);
-
+        
         let userHasProfilePermission = false,
           userHasPositionPermission = false,
           userHasRolePermissions = false;
-          console.log("position",profile.position,adminProfiles.includes(profile.position))
-          console.log("role",profile.role,adminProfiles.includes(profile.role))
+          
         if (
           adminProfiles.includes(profile.position) ||
           adminProfiles.includes(profile.role)
         ) {
           const results = { read : true, ...permissionService }
-          console.log("Admin profile detected, granting all permissions:", results);
-          return results;
+           return results;
         } else if(Array.isArray(permissionService) && permissionService.length > 0) {
           userHasProfilePermission = permissionService.some(
             (perm) => perm.profile === profile._id

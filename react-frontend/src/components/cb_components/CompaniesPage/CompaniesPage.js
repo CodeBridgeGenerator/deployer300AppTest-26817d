@@ -216,8 +216,8 @@ const CompaniesPage = (props) => {
           setLoading(false);
           props.hide();
           console.log({ error });
-        })
-      )
+        }),
+      ),
     );
     props.hide();
     setLoading(false);
@@ -429,14 +429,14 @@ const CompaniesPage = (props) => {
 
     if (currentCache && selectedUser) {
       const selectedUserProfile = currentCache.profiles.find(
-        (profile) => profile.profileId === selectedUser
+        (profile) => profile.profileId === selectedUser,
       );
 
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
           "preferences.settings.companies.paginatorRecordsNo",
-          10
+          10,
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
         console.log("PaginatorRecordsNo from cache:", paginatorRecordsNo);
@@ -453,7 +453,7 @@ const CompaniesPage = (props) => {
       const paginatorRecordsNo = _.get(
         profileResponse,
         "preferences.settings.companies.paginatorRecordsNo",
-        10
+        10,
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
       console.log("PaginatorRecordsNo from service:", paginatorRecordsNo);
@@ -472,14 +472,14 @@ const CompaniesPage = (props) => {
 
       if (currentCache && selectedUser) {
         const selectedUserProfileIndex = currentCache.profiles.findIndex(
-          (profile) => profile.profileId === selectedUser
+          (profile) => profile.profileId === selectedUser,
         );
 
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
             "preferences.settings.companies.paginatorRecordsNo",
-            paginatorRecordsNo
+            paginatorRecordsNo,
           );
 
           props.set(currentCache);
@@ -504,7 +504,7 @@ const CompaniesPage = (props) => {
           {permissions.read ? (
             <SplitButton
               model={menuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
               )}
               dropdownIcon="pi pi-ellipsis-h"
               buttonClassName="hidden"
@@ -520,7 +520,7 @@ const CompaniesPage = (props) => {
             />{" "}
             <SplitButton
               model={filterMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img
@@ -534,7 +534,7 @@ const CompaniesPage = (props) => {
             ></SplitButton>
             <SplitButton
               model={sortMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img

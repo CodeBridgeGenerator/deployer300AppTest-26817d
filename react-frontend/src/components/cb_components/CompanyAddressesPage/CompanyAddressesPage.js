@@ -47,8 +47,9 @@ const CompanyAddressesPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);  
-const [permissions, setPermissions] = useState({});  const [selectedUser, setSelectedUser] = useState();
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [selectedUser, setSelectedUser] = useState();
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
 

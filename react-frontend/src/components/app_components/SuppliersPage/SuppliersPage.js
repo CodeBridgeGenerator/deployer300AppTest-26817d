@@ -43,8 +43,8 @@ const SuppliersPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);  
-const [permissions, setPermissions] = useState({});
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
   const toggleHelpSidebar = () => {
     setHelpSidebarVisible(!isHelpSidebarVisible);
   };

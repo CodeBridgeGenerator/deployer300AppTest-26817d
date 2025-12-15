@@ -90,7 +90,8 @@ import DashboardMessaging from '../components/Dashboard/DashboardMessaging';
 import DashboardUserManagement from '../components/Dashboard/DashboardUserManagement';
 import DashboardGenAi from '../components/Dashboard/DashboardGenAi';
 import DashboardHRControls from '../components/Dashboard/DashboardHRControls';
-import DashboardWelcome from '../components/Dashboard/DashboardWelcome';
+import SingleUserLoginPage from '../components/cb_components/UserLogin/SingleUserLoginPage';
+import UserLoginPage from '../components/cb_components/UserLogin/UserLoginPage';
 
 const CBRouter = (props) => {
     return (
@@ -106,6 +107,8 @@ const CBRouter = (props) => {
             <Route path="/userPhones" exact element={<UserPhoneProjectLayoutPage />} />
             <Route path="/userChangePassword/:singleUserChangePasswordId" exact element={<SingleUserChangePasswordPage />} />
             <Route path="/userChangePassword" exact element={<UserChangePasswordProjectLayoutPage />} />
+            <Route path="/loginHistory" exact element={<UserLoginPage />} />
+            <Route path="/loginHistory/:singleLoginHistoryId" exact element={<SingleUserLoginPage />} />
 
              {/* dashboards */}
             <Route path="/DashboardAdminControl" exact element={<DashboardAdminControl />} /> 

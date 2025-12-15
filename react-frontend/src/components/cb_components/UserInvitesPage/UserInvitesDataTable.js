@@ -53,7 +53,6 @@ const UserInvitesDataTable = ({
   hasServiceFieldsPermission,
   filename,
 }) => {
-  console.log("Items in DataTable:", items);
   const dt = useRef(null);
   const urlParams = useParams();
   const [globalFilter, setGlobalFilter] = useState("");
@@ -172,7 +171,7 @@ const UserInvitesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      console.log("option", options);
+      
 
       return (
         <div>
@@ -326,7 +325,7 @@ const UserInvitesDataTable = ({
       life: 3000,
     });
   };
-  console.log("Hidden Fields:", selectedHideFields);
+  
   return (
     <>
       <DataTable
@@ -640,7 +639,6 @@ const UserInvitesDataTable = ({
           text
           label="save as pref"
           onClick={() => {
-            console.debug(selectedFilterFields);
             onClickSaveFilteredfields(selectedFilterFields);
             setSelectedFilterFields(selectedFilterFields);
             setShowFilter(false);
@@ -670,7 +668,6 @@ const UserInvitesDataTable = ({
           text
           label="save as pref"
           onClick={() => {
-            console.debug(selectedHideFields);
             onClickSaveHiddenfields(selectedHideFields);
             setSelectedHideFields(selectedHideFields);
             setShowColumns(false);
@@ -753,8 +750,8 @@ const mapState = (state) => {
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
-  get: () => dispatch.cache.get(),  
-hasServicePermission: (service) =>
+  get: () => dispatch.cache.get(),
+  hasServicePermission: (service) =>
     dispatch.perms.hasServicePermission(service),
   hasServiceFieldsPermission: (service) =>
     dispatch.perms.hasServiceFieldsPermission(service),

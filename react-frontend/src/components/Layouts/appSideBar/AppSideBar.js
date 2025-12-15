@@ -318,7 +318,7 @@ const AppSideBar = (props) => {
                   label: "Logins",
                   icon: <UserLogin />,
                   menuKey: "user-logins",
-                  to: "/cbAdmin/userLogin",
+                  to: "/cbAdmin/loginHistory",
                 },
 
                 {

@@ -212,7 +212,7 @@ const CompanyPhonesPage = (props) => {
     props.show();
     const countDataItems = data?.length;
     const promises = data.map((e) =>
-      client.service("companyPhones").remove(e?._id)
+      client.service("companyPhones").remove(e?._id),
     );
     await Promise.all(
       promises.map((p) =>
@@ -225,8 +225,8 @@ const CompanyPhonesPage = (props) => {
           setLoading(false);
           props.hide();
           console.debug({ error });
-        })
-      )
+        }),
+      ),
     );
     props.hide();
     setLoading(false);
@@ -428,14 +428,14 @@ const CompanyPhonesPage = (props) => {
 
     if (currentCache && selectedUser) {
       const selectedUserProfile = currentCache.profiles.find(
-        (profile) => profile.profileId === selectedUser
+        (profile) => profile.profileId === selectedUser,
       );
 
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
           "preferences.settings.companyPhones.paginatorRecordsNo",
-          10
+          10,
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
         console.log("PaginatorRecordsNo from cache:", paginatorRecordsNo);
@@ -452,7 +452,7 @@ const CompanyPhonesPage = (props) => {
       const paginatorRecordsNo = _.get(
         profileResponse,
         "preferences.settings.companyPhones.paginatorRecordsNo",
-        10
+        10,
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
       console.log("PaginatorRecordsNo from service:", paginatorRecordsNo);
@@ -471,14 +471,14 @@ const CompanyPhonesPage = (props) => {
 
       if (currentCache && selectedUser) {
         const selectedUserProfileIndex = currentCache.profiles.findIndex(
-          (profile) => profile.profileId === selectedUser
+          (profile) => profile.profileId === selectedUser,
         );
 
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
             "preferences.settings.companyPhones.paginatorRecordsNo",
-            paginatorRecordsNo
+            paginatorRecordsNo,
           );
 
           props.set(currentCache);
@@ -506,7 +506,7 @@ const CompanyPhonesPage = (props) => {
           {permissions.read ? (
             <SplitButton
               model={menuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
               )}
               dropdownIcon="pi pi-ellipsis-h"
               buttonClassName="hidden"
@@ -523,7 +523,7 @@ const CompanyPhonesPage = (props) => {
             />
             <SplitButton
               model={filterMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img
@@ -537,7 +537,7 @@ const CompanyPhonesPage = (props) => {
             ></SplitButton>
             <SplitButton
               model={sortMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img

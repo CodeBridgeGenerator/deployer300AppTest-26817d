@@ -68,6 +68,21 @@ const BranchesDataTable = ({
   const [triggerDownload, setTriggerDownload] = useState(false);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, [selectedUser]);
+
   const header = (
     <div
       className="table-header"
@@ -122,7 +137,7 @@ const BranchesDataTable = ({
           _selectedItems.push(rowData);
         } else {
           _selectedItems = _selectedItems.filter(
-            (item) => item._id !== rowData._id,
+            (item) => item._id !== rowData._id
           );
         }
         setSelectedItems(_selectedItems);
@@ -177,7 +192,7 @@ const BranchesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      console.log("option", options);
+      
 
       return (
         <div>
@@ -202,11 +217,11 @@ const BranchesDataTable = ({
   const confirmDelete = async () => {
     try {
       const promises = selectedItems.map((item) =>
-        client.service("branches").remove(item._id),
+        client.service("branches").remove(item._id)
       );
       await Promise.all(promises);
       const updatedData = data.filter(
-        (item) => !selectedItems.find((selected) => selected._id === item._id),
+        (item) => !selectedItems.find((selected) => selected._id === item._id)
       );
       setData(updatedData);
       setSelectedDelete(selectedItems.map((item) => item._id));
@@ -238,7 +253,7 @@ const BranchesDataTable = ({
 
     try {
       const dataToCopy = selectedItems.map((item) =>
-        _.omit(item, ["_id", "createdAt", "updatedAt"]),
+        _.omit(item, ["_id", "createdAt", "updatedAt"])
       );
       await navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
       toast.current.show({

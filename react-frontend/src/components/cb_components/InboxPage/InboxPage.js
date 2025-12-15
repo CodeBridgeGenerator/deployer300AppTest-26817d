@@ -30,8 +30,9 @@ const InboxPage = (props) => {
   const [searchDialog, setSearchDialog] = useState(false);
   const [items, setItems] = useState([]);
   const [flaggedItems, setFlaggedItems] = useState([]);
-  const [selectedDelete, setSelectedDelete] = useState([]);  
-const [permissions, setPermissions] = useState({});  const urlParams = useParams();
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const urlParams = useParams();
 
   const currentUserId = props.user._id;
   const service = props.service || "common";

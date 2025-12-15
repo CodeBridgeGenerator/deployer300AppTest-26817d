@@ -185,7 +185,7 @@ const CompaniesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      console.log("option", options);
+      
 
       return (
         <div>
@@ -244,13 +244,13 @@ const CompaniesDataTable = ({
       }
     };
 
-      fetchFieldPermissions();
+    fetchFieldPermissions();
     if (selectedUser) {
       fetchFieldPermissions();
     }
   }, [selectedUser]);
 
-const fetchServicePermissions = async () => {
+  const fetchServicePermissions = async () => {
     setIsLoadingPermissions(true);
     const servicePermissions = await hasServicePermission(filename);
     const fieldPermissions = await hasServiceFieldsPermission(filename);
@@ -850,8 +850,8 @@ const mapState = (state) => {
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
-  get: () => dispatch.cache.get(),  
-hasServicePermission: (service) =>
+  get: () => dispatch.cache.get(),
+  hasServicePermission: (service) =>
     dispatch.perms.hasServicePermission(service),
   hasServiceFieldsPermission: (service) =>
     dispatch.perms.hasServiceFieldsPermission(service),

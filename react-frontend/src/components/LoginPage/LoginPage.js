@@ -32,6 +32,7 @@ const LoginPage = (props) => {
   const [isEmail, setEmailOrStaffId] = useState(true);
   const [sessionChecked, setSessionChecked] = useState(false);
   const projectName = process.env.REACT_APP_PROJECT_LABEL;
+  const projectDomain = process.env.REACT_APP_PROJECT_DOMAIN;
 
   useEffect(() => {
     // Only run this check once when component mounts
@@ -57,21 +58,17 @@ const LoginPage = (props) => {
     if (e.key === "Enter") login();
   };
 
-  const _getEmail = async () => {
-    return await client
-      .service("userInvites")
-      .find({ query: { emailLogin: email } });
-  };
-
   // Function to get device information
   const getDeviceDetails = () => {
     const userAgent = navigator.userAgent;
     const browser = navigator.appName;
     const platform = navigator.platform;
+    const ip = navigator.ip; // Note: navigator.ip is not a standard property and may not work in all browsers
     return {
       device: platform,
       browser: browser,
       userAgent: userAgent,
+      ip,
     };
   };
 
@@ -80,18 +77,20 @@ const LoginPage = (props) => {
     setLoading(true);
     if (validate()) {
       try {
-        const loginEmail = isEmail ? email : `${email}@example.com.my`;
+        const loginEmail = isEmail ? email : `${email}@${projectDomain}`;
         const deviceDetails = getDeviceDetails();
+
         props
           .login({ email: loginEmail, password })
           .then(async (res) => {
             try {
               await props.verifyProfileOrCreate();
-              await client.service("loginHistory").create({
+
+              client.service("loginHistory").create({
                 userId: res.user._id,
-                device: deviceDetails.device,
-                browser: deviceDetails.browser,
+                ...deviceDetails,
                 userAgent: navigator.userAgent,
+                logoutTime: null,
               });
             } catch (historyError) {
               console.error("Failed to save login history:", historyError);
@@ -148,7 +147,7 @@ const LoginPage = (props) => {
     }
     if (password.length < 6) {
       setPasswordError(
-        "Please enter a valid password. Must be at least 6 characters",
+        "Please enter a valid password. Must be at least 6 characters"
       );
       isValid = false;
     }
@@ -275,7 +274,7 @@ const LoginPage = (props) => {
                   onChange={(e) => setEmail(e.target.value)}
                   className={classNames(
                     emailError ? "p-invalid" : "",
-                    "w-full",
+                    "w-full"
                   )}
                   onKeyDown={onEnter}
                 />
@@ -298,7 +297,7 @@ const LoginPage = (props) => {
                     onChange={(e) => setPassword(e.target.value)}
                     className={classNames(
                       passwordError ? "p-invalid" : "",
-                      "w-full",
+                      "w-full"
                     )}
                     onKeyDown={onEnter}
                   />

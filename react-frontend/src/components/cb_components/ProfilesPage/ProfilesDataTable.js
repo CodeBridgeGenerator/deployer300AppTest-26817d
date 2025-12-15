@@ -216,7 +216,7 @@ const ProfilesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      // console.log("option", options);
+      // 
 
       return (
         <div>

@@ -12,7 +12,7 @@ import { InputText } from "primereact/inputtext";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
 import DownloadCSV from "../../../utils/DownloadCSV";
-import InboxCreateDialogComponent from "../../cb_components/InboxPage/InboxCreateDialogComponent";
+import InboxCreateDialogComponent from "../InboxPage/InboxCreateDialogComponent";
 import InviteIcon from "../../../assets/media/Invite.png";
 import ExportIcon from "../../../assets/media/Export & Share.png";
 import CopyIcon from "../../../assets/media/Clipboard.png";
@@ -28,9 +28,7 @@ import { Checkbox } from "primereact/checkbox";
 const PositionsDataTable = ({
   items,
   fields,
-  onEditRow,
-  onRowDelete,
-  onRowClick,
+   onRowClick,
   searchDialog,
   setSearchDialog,
   showUpload,
@@ -47,11 +45,9 @@ const PositionsDataTable = ({
   onClickSaveHiddenfields,
   loading,
   user,
-  selectedDelete,
-  setSelectedDelete,
   onCreateResult,
   setRefresh,
-  selectedUser,
+  
   setPaginatorRecordsNo,
   paginatorRecordsNo,
   hasServicePermission,
@@ -93,29 +89,17 @@ const PositionsDataTable = ({
   );
 
   const dropdownTemplate0 = (rowData, { rowIndex }) => (
-    <p>{rowData.roleId?.name}</p>
+    <p>{rowData.userId?.name}</p>
   );
-  const pTemplate1 = (rowData, { rowIndex }) => <p>{rowData.name}</p>;
-  const inputTextareaTemplate2 = (rowData, { rowIndex }) => (
-    <p>{rowData.description}</p>
+  const pTemplate1 = (rowData, { rowIndex }) => (
+    <p>{moment(rowData.loginTime).fromNow()}</p>
   );
-  const pTemplate3 = (rowData, { rowIndex }) => <p>{rowData.abbr}</p>;
-  const tickTemplate4 = (rowData, { rowIndex }) => (
-    <i className={`pi ${rowData.isDefault ? "pi-check" : "pi-times"}`}></i>
-  );
-  const editTemplate = (rowData, { rowIndex }) => (
-    <Button
-      onClick={() => onEditRow(rowData, rowIndex)}
-      icon={`pi ${rowData.isEdit ? "pi-check" : "pi-pencil"}`}
-      className={`p-button-rounded p-button-text ${rowData.isEdit ? "p-button-success" : "p-button-warning"}`}
-    />
-  );
-  const deleteTemplate = (rowData, { rowIndex }) => (
-    <Button
-      onClick={() => onRowDelete(rowData._id)}
-      icon="pi pi-trash"
-      className="p-button-rounded p-button-danger p-button-text"
-    />
+  const pTemplate2 = (rowData, { rowIndex }) => <p>{rowData.device}</p>;
+  const pTemplate3 = (rowData, { rowIndex }) => <p>{rowData.ip}</p>;
+  const pTemplate4 = (rowData, { rowIndex }) => <p>{rowData.browser}</p>;
+  const pTemplate5 = (rowData, { rowIndex }) => <p>{rowData.userAgent}</p>;
+  const pTemplate6 = (rowData, { rowIndex }) => (
+    <p>{moment(rowData.logoutTime).fromNow()}</p>
   );
 
   const checkboxTemplate = (rowData) => (
@@ -128,7 +112,7 @@ const PositionsDataTable = ({
           _selectedItems.push(rowData);
         } else {
           _selectedItems = _selectedItems.filter(
-            (item) => item._id !== rowData._id,
+            (item) => item._id !== rowData._id
           );
         }
         setSelectedItems(_selectedItems);
@@ -193,40 +177,10 @@ const PositionsDataTable = ({
     },
   };
 
-  const deselectAllRows = () => {
-    // Logic to deselect all selected rows
-    setSelectedItems([]); // Assuming setSelectedItems is used to manage selected items state
-  };
-
-  const handleDelete = async () => {
-    if (!selectedItems || selectedItems.length === 0) return;
-    setShowDeleteConfirmation(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      const promises = selectedItems.map((item) =>
-        client.service("positions").remove(item._id),
-      );
-      await Promise.all(promises);
-      const updatedData = data.filter(
-        (item) => !selectedItems.find((selected) => selected._id === item._id),
-      );
-      setData(updatedData);
-      setSelectedDelete(selectedItems.map((item) => item._id));
-      deselectAllRows();
-      setShowDeleteConfirmation(false);
-      setRefresh((prev) => !prev);
-    } catch (error) {
-      console.error("Failed to delete selected records", error);
-      setShowDeleteConfirmation(false);
-    }
-  };
-
   useEffect(() => {
     const fetchPermissions = async () => {
       setIsLoadingPermissions(true);
-      const servicePermission = await hasServicePermission(filename); 
+      const servicePermission = await hasServicePermission(filename);
       const fieldPermissions = await hasServiceFieldsPermission(filename);
       setPermissions(servicePermission);
       setFieldPermissions(fieldPermissions);
@@ -250,16 +204,16 @@ const PositionsDataTable = ({
 
     try {
       const dataToCopy = selectedItems.map((item) =>
-        _.omit(item, ["_id", "createdAt", "updatedAt"]),
+        _.omit(item, ["_id", "createdAt", "updatedAt"])
       );
       await navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
       toast.current.show({
         severity: "success",
         summary: "Copied",
-        detail: `positions data copied to clipboard`,
+        detail: `Login History data copied to clipboard`,
         life: 3000,
       });
-      deselectAllRows();
+
       setRefresh((prev) => !prev);
     } catch (error) {
       console.error("Failed to copy to clipboard", error);
@@ -280,23 +234,23 @@ const PositionsDataTable = ({
         const newItem = _.omit(item, ["_id", "createdAt", "updatedAt"]);
         newItem.createdBy = user._id;
         newItem.updatedBy = user._id;
-        return client.service("positions").create(newItem);
+        return client.service("loginHistory").create(newItem);
       });
-      const createdItems = await Promise.all(promises);
+
       toast.current.show({
         severity: "success",
         summary: "Duplicated",
-        detail: `${selectedItems.length} positions duplicated successfully`,
+        detail: `${selectedItems.length} Login History duplicated successfully`,
         life: 3000,
       });
       deselectAllRows();
       setRefresh((prev) => !prev);
     } catch (error) {
-      console.error("Failed to duplicate positions", error);
+      console.error("Failed to duplicate Login History", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
-        detail: "Failed to duplicate positions",
+        detail: "Failed to duplicate Login History",
         life: 3000,
       });
     }
@@ -372,55 +326,67 @@ const PositionsDataTable = ({
               body={checkboxTemplate}
             />
             <Column
-              field="roleId"
-              header="Role"
+              field="userId"
+              header="User"
               body={dropdownTemplate0}
-              filter={selectedFilterFields.includes("roleId")}
-              hidden={selectedHideFields?.includes("roleId")}
+              filter={selectedFilterFields.includes("userId")}
+              hidden={selectedHideFields?.includes("userId")}
               style={{ minWidth: "8rem" }}
             />
             <Column
-              field="name"
-              header="Name"
+              field="loginTime"
+              header="Logged IN"
               body={pTemplate1}
-              filter={selectedFilterFields.includes("name")}
-              hidden={selectedHideFields?.includes("name")}
+              filter={selectedFilterFields.includes("loginTime")}
+              hidden={selectedHideFields?.includes("loginTime")}
               sortable
               style={{ minWidth: "8rem" }}
             />
             <Column
-              field="description"
-              header="Description"
-              body={inputTextareaTemplate2}
-              filter={selectedFilterFields.includes("description")}
-              hidden={selectedHideFields?.includes("description")}
+              field="device"
+              header="Device"
+              body={pTemplate2}
+              filter={selectedFilterFields.includes("device")}
+              hidden={selectedHideFields?.includes("device")}
               sortable
               style={{ minWidth: "8rem" }}
             />
             <Column
-              field="abbr"
-              header="Abbr"
+              field="ip"
+              header="IP"
               body={pTemplate3}
-              filter={selectedFilterFields.includes("abbr")}
-              hidden={selectedHideFields?.includes("abbr")}
+              filter={selectedFilterFields.includes("ip")}
+              hidden={selectedHideFields?.includes("ip")}
               sortable
               style={{ minWidth: "8rem" }}
             />
             <Column
-              field="isDefault"
-              header="Is default"
-              body={tickTemplate4}
-              filter={selectedFilterFields.includes("isDefault")}
-              hidden={selectedHideFields?.includes("isDefault")}
+              field="browser"
+              header="Browser"
+              body={pTemplate4}
+              filter={selectedFilterFields.includes("Browser")}
+              hidden={selectedHideFields?.includes("Browser")}
               sortable
               style={{ minWidth: "8rem" }}
             />
-            {permissions.update ? (
-              <Column header="Edit" body={editTemplate} />
-            ) : null}
-            {permissions.delete ? (
-              <Column header="Delete" body={deleteTemplate} />
-            ) : null}
+            <Column
+              field="userAgent"
+              header="Agent"
+              body={pTemplate5}
+              filter={selectedFilterFields.includes("userAgent")}
+              hidden={selectedHideFields?.includes("userAgent")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="lougoutTime"
+              header="Logged Out"
+              body={pTemplate6}
+              filter={selectedFilterFields.includes("lougoutTime")}
+              hidden={selectedHideFields?.includes("lougoutTime")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
           </DataTable>
 
           {selectedItems.length > 0 ? (
@@ -624,13 +590,13 @@ const PositionsDataTable = ({
           ) : null}
 
           <Dialog
-            header="Upload Positions Data"
+            header="Upload Login History Data"
             visible={showUpload}
             onHide={() => setShowUpload(false)}
           >
             <UploadService
               user={user}
-              serviceName="positions"
+              serviceName="loginHistory"
               onUploadComplete={() => {
                 setShowUpload(false); // Close the dialog after upload
               }}
@@ -638,7 +604,7 @@ const PositionsDataTable = ({
           </Dialog>
 
           <Dialog
-            header="Search Positions"
+            header="Search Login History"
             visible={searchDialog}
             onHide={() => setSearchDialog(false)}
           >
@@ -725,13 +691,6 @@ const PositionsDataTable = ({
                     marginRight: "2rem",
                   }}
                 />
-                <Button
-                  label="Delete"
-                  onClick={confirmDelete}
-                  className="no-focus-effect"
-                  rounded
-                  style={{ width: "200px" }}
-                />
               </div>
             }
           >
@@ -763,7 +722,7 @@ const PositionsDataTable = ({
 
           <DownloadCSV
             data={items}
-            fileName="positions"
+            fileName={filename}
             triggerDownload={triggerDownload}
             setTriggerDownload={setTriggerDownload}
             selectedData={selectedItems}

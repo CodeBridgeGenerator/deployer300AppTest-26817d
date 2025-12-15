@@ -110,7 +110,7 @@ module.exports = function (app) {
     {
       timestamps: true,
     },
-    { strictPopulate: false }
+    { strictPopulate: false },
   );
 
   if (mongooseClient.modelNames().includes(modelName)) {

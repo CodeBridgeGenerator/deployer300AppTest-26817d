@@ -179,7 +179,7 @@ const SectionsDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      console.log("option", options);
+      
 
       return (
         <div>
@@ -239,13 +239,13 @@ const SectionsDataTable = ({
       }
     };
 
-      fetchFieldPermissions();
+    fetchFieldPermissions();
     if (selectedUser) {
       fetchFieldPermissions();
     }
   }, [selectedUser]);
 
-const fetchServicePermissions = async () => {
+  const fetchServicePermissions = async () => {
     setIsLoadingPermissions(true);
     const servicePermissions = await hasServicePermission(filename);
     const fieldPermissions = await hasServiceFieldsPermission(filename);

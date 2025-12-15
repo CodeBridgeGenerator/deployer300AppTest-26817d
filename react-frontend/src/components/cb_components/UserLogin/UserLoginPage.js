@@ -9,32 +9,21 @@ import client from "../../../services/restClient";
 import entityCreate from "../../../utils/entity";
 import DownloadCSV from "../../../utils/DownloadCSV";
 import AreYouSureDialog from "../../common/AreYouSureDialog";
-import BranchesDatatable from "./BranchesDataTable";
-import BranchesEditDialogComponent from "./BranchesEditDialogComponent";
-import BranchesCreateDialogComponent from "./BranchesCreateDialogComponent";
-import BranchesFakerDialogComponent from "./BranchesFakerDialogComponent";
-import BranchesSeederDialogComponent from "./BranchesSeederDialogComponent";
+import UserLoginsDataTable from "./UserLoginsDataTable";
+
 import SortIcon from "../../../assets/media/Sort.png";
 import FilterIcon from "../../../assets/media/Filter.png";
 import FavouriteService from "../../../services/FavouriteService";
 import { v4 as uuidv4 } from "uuid";
 import HelpbarService from "../../../services/HelpbarService";
 
-const BranchesPage = (props) => {
+const LoginHistory = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [data, setData] = useState([]);
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showAreYouSureDialog, setShowAreYouSureDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newRecord, setRecord] = useState({});
-  const [showFakerDialog, setShowFakerDialog] = useState(false);
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
-  const [showSeederDialog, setShowSeederDialog] = useState(false);
-  const [selectedEntityIndex, setSelectedEntityIndex] = useState(null);
-  const [showUpload, setShowUpload] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilterFields, setSelectedFilterFields] = useState([]);
   const [selectedHideFields, setSelectedHideFields] = useState([]);
@@ -42,15 +31,13 @@ const BranchesPage = (props) => {
   const [searchDialog, setSearchDialog] = useState(false);
   const [triggerDownload, setTriggerDownload] = useState(false);
   const urlParams = useParams();
-  const filename = "branches";
+  const filename = "loginHistory";
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
   const [permissions, setPermissions] = useState({});
+  const [selectedUser, setSelectedUser] = useState();
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
-
   const getOrSetTabId = () => {
     let tabId = sessionStorage.getItem("browserTabId");
     if (!tabId) {
@@ -72,15 +59,15 @@ const BranchesPage = (props) => {
   };
 
   const favouriteItem = {
-    icon: "pi pi-th-large",
-    label: "branches",
-    url: "/branches",
-    mainMenu: "company",
+    icon: "pi pi-user",
+    label: "positions",
+    url: "/positions",
+    mainMenu: "people",
   };
 
   useEffect(() => {
     const _getSchema = async () => {
-      const _schema = await props.getSchema("branches");
+      const _schema = await props.getSchema("loginHistory");
       const _fields = _schema.data.map((field, i) => i > 5 && field.field);
       setSelectedHideFields(_fields);
     };
@@ -99,26 +86,15 @@ const BranchesPage = (props) => {
     setLoading(true);
     props.show();
     client
-      .service("branches")
+      .service("loginHistory")
       .find({
         query: {
           $limit: 10000,
-          $sort: { name: 1 },
-          companyId: urlParams.singleCompaniesId,
+          $sort: { createdAt: -1 },
           $populate: [
             {
-              path: "createdBy",
+              path: "userId",
               service: "users",
-              select: ["name"],
-            },
-            {
-              path: "updatedBy",
-              service: "users",
-              select: ["name"],
-            },
-            {
-              path: "companyId",
-              service: "companies",
               select: ["name"],
             },
           ],
@@ -137,16 +113,12 @@ const BranchesPage = (props) => {
         setLoading(false);
         props.hide();
         props.alert({
-          title: "Branches",
+          title: "Login History",
           type: "error",
-          message: error.message || "Failed get Branches",
+          message: error.message || "Failed get Login History",
         });
       });
   }, [
-    showFakerDialog,
-    showDeleteAllDialog,
-    showEditDialog,
-    showCreateDialog,
     refresh,
   ]);
 
@@ -158,106 +130,13 @@ const BranchesPage = (props) => {
     console.debug(ff);
   };
 
-  const onEditRow = (rowData, rowIndex) => {
-    setSelectedEntityIndex(rowData._id);
-    setShowEditDialog(true);
-  };
-
-  const onCreateResult = (newEntity) => {
-    setData([...data, newEntity]);
-  };
-  const onFakerCreateResults = (newEntities) => {
-    setSelectedEntityIndex();
-    setData([...data, ...newEntities]);
-  };
-  const onSeederResults = (newEntities) => {
-    setSelectedEntityIndex();
-    setData([...data, ...newEntities]);
-  };
-
-  const onEditResult = (newEntity) => {
-    let _newData = _.cloneDeep(data);
-    _.set(_newData, { _id: selectedEntityIndex }, newEntity);
-    setData(_newData);
-  };
-
-  const deleteRow = async () => {
-    try {
-      await client.service("branches").remove(selectedEntityIndex);
-      let _newData = data.filter((data) => data._id !== selectedEntityIndex);
-      setData(_newData);
-      setSelectedEntityIndex();
-      setShowAreYouSureDialog(false);
-    } catch (error) {
-      console.debug({ error });
-      props.alert({
-        title: "Branches",
-        type: "error",
-        message: error.message || "Failed delete record",
-      });
-    }
-  };
-  const onRowDelete = (index) => {
-    setSelectedEntityIndex(index);
-    setShowAreYouSureDialog(true);
-  };
-
-  const onShowDeleteAll = (rowData, rowIndex) => {
-    setShowDeleteAllDialog(true);
-  };
-
-  const deleteAll = async () => {
-    setLoading(true);
-    props.show();
-    const countDataItems = data?.length;
-    const promises = data.map((e) => client.service("branches").remove(e._id));
-    await Promise.all(
-      promises.map((p) =>
-        p.catch((error) => {
-          props.alert({
-            title: "Branches",
-            type: "error",
-            message: error.message || "Failed to delete all records",
-          });
-          setLoading(false);
-          props.hide();
-          console.debug({ error });
-        }),
-      ),
-    );
-    props.hide();
-    setLoading(false);
-    setShowDeleteAllDialog(false);
-    await props.alert({
-      title: "Branches",
-      type: "warn",
-      message: `Successfully dropped ${countDataItems} records`,
-    });
-  };
+  
+  
+  
+  
 
   const onRowClick = ({ data }) => {
-    navigate(`/branches/${data._id}`);
-  };
-
-  const copyPageLink = () => {
-    const currentUrl = window.location.href;
-    navigator.clipboard
-      .writeText(currentUrl)
-      .then(() => {
-        props.alert({
-          title: "Copied",
-          type: "success",
-          message: "Page link copied to clipboard",
-        });
-      })
-      .catch((error) => {
-        props.alert({
-          title: "Error",
-          type: "error",
-          message: "Failed to copy page link",
-        });
-        console.error("Failed to copy: ", error);
-      });
+    navigate(`/loginHistory/${data._id}`);
   };
 
   const menuItems = [
@@ -266,13 +145,6 @@ const BranchesPage = (props) => {
       icon: "pi pi-copy",
       command: () => copyPageLink(),
     },
-    permissions.import
-      ? {
-          label: "Import",
-          icon: "pi pi-upload",
-          command: () => setShowUpload(true),
-        }
-      : null,
     permissions.export
       ? {
           label: "Export",
@@ -293,40 +165,7 @@ const BranchesPage = (props) => {
       icon: "pi pi-question-circle",
       command: () => toggleHelpSidebar(),
     },
-    { separator: true },
-    process.env.REACT_APP_ENV == "development"
-      ? {
-          label: "Testing",
-          icon: "pi pi-check-circle",
-          items: [
-            {
-              label: "Faker",
-              icon: "pi pi-bullseye",
-              command: (e) => {
-                setShowFakerDialog(true);
-              },
-              show: true,
-            },
-            {
-              label: `Drop ${data?.length}`,
-              icon: "pi pi-trash",
-              command: (e) => {
-                setShowDeleteAllDialog(true);
-              },
-            },
-          ],
-        }
-      : null,
-    permissions.seeder
-      ? {
-          label: "Data seeder",
-          icon: "pi pi-database",
-          command: (e) => {
-            setShowSeederDialog(true);
-          },
-        }
-      : null,
-  ].filter(Boolean);
+  ]
 
   const onMenuSort = (sortOption) => {
     let sortedData;
@@ -392,7 +231,7 @@ const BranchesPage = (props) => {
     },
     {
       label: "Reset",
-      command: () => setData(_.cloneDeep(initialData)),
+      command: () => setData(_.cloneDeep(initialData)), // Reset to original data if you want
       template: (item) => (
         <div
           style={{
@@ -411,11 +250,32 @@ const BranchesPage = (props) => {
       ),
     },
   ];
+  const copyPageLink = () => {
+    const currentUrl = window.location.href;
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        props.alert({
+          title: "Copied",
+          type: "success",
+          message: "Page link copied to clipboard",
+        });
+      })
+      .catch((error) => {
+        props.alert({
+          title: "Error",
+          type: "error",
+          message: "Failed to copy page link",
+        });
+        console.error("Failed to copy: ", error);
+      });
+  };
 
   useEffect(() => {
     get();
+    props.hasServicePermission(filename).then(setPermissions);
   }, []);
-
+  
   const get = async () => {
     const tabId = getOrSetTabId();
     const response = await props.get();
@@ -433,7 +293,7 @@ const BranchesPage = (props) => {
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
-          "preferences.settings.branches.paginatorRecordsNo",
+          "preferences.settings.loginHistory.paginatorRecordsNo",
           10,
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
@@ -450,7 +310,7 @@ const BranchesPage = (props) => {
 
       const paginatorRecordsNo = _.get(
         profileResponse,
-        "preferences.settings.branches.paginatorRecordsNo",
+        "preferences.settings.loginHistory.paginatorRecordsNo",
         10,
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
@@ -476,7 +336,7 @@ const BranchesPage = (props) => {
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
-            "preferences.settings.branches.paginatorRecordsNo",
+            "preferences.settings.loginHistory.paginatorRecordsNo",
             paginatorRecordsNo,
           );
 
@@ -498,24 +358,26 @@ const BranchesPage = (props) => {
           <h4 className="mb-0 ml-2">
             <span>
               {" "}
-              <Link to="/DashboardCompanyData">Company</Link> /{" "}
+              
             </span>
-            <strong>Branches </strong>
+            <strong>Login History </strong>
           </h4>
-          <SplitButton
-            model={menuItems.filter(
-              (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
-            )}
-            dropdownIcon="pi pi-ellipsis-h"
-            buttonClassName="hidden"
-            menuButtonClassName="ml-1 p-button-text"
-          />
+          {permissions.read ? (
+            <SplitButton
+              model={menuItems.filter(
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
+              )}
+              dropdownIcon="pi pi-ellipsis-h"
+              buttonClassName="hidden"
+              menuButtonClassName="ml-1 p-button-text"
+            />
+          ) : null}
         </div>
         <div className="col-6 flex justify-content-end">
           <>
             <FavouriteService
               favouriteItem={favouriteItem}
-              serviceName="branches"
+              serviceName="peoples"
             />{" "}
             <SplitButton
               model={filterMenuItems.filter(
@@ -545,31 +407,30 @@ const BranchesPage = (props) => {
               menuButtonClassName="ml-1 p-button-text"
               menuStyle={{ width: "200px" }}
             ></SplitButton>
-            <Button
-              label="add"
-              style={{ height: "30px", marginRight: "10px" }}
-              rounded
-              loading={loading}
-              icon="pi pi-plus"
-              onClick={() => setShowCreateDialog(true)}
-              role="branches-add-button"
-            />
+            {permissions.create ? (
+              <Button
+                label="add"
+                style={{ height: "30px", marginRight: "10px" }}
+                rounded
+                loading={loading}
+                icon="pi pi-plus"
+                onClick={() => setShowCreateDialog(true)}
+                role="positions-add-button"
+              />
+            ) : null}
           </>
         </div>
       </div>
       <div className="grid align-items-center">
-        <div className="col-12" role="branches-datatable">
-          <BranchesDatatable
+        <div className="col-12" role="positions-datatable">
+          <UserLoginsDataTable
             items={data}
             fields={fields}
-            onRowDelete={onRowDelete}
-            onEditRow={onEditRow}
+
             onRowClick={onRowClick}
             searchDialog={searchDialog}
             setSearchDialog={setSearchDialog}
-            showUpload={showUpload}
-            setShowUpload={setShowUpload}
-            showFilter={showFilter}
+                        showFilter={showFilter}
             setShowFilter={setShowFilter}
             showColumns={showColumns}
             setShowColumns={setShowColumns}
@@ -581,9 +442,6 @@ const BranchesPage = (props) => {
             onClickSaveHiddenfields={onClickSaveHiddenfields}
             loading={loading}
             user={props.user}
-            selectedDelete={selectedDelete}
-            setSelectedDelete={setSelectedDelete}
-            onCreateResult={onCreateResult}
             setRefresh={setRefresh}
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
@@ -598,47 +456,11 @@ const BranchesPage = (props) => {
         triggerDownload={triggerDownload}
         setTriggerDownload={setTriggerDownload}
       />
-      <AreYouSureDialog
-        header="Delete"
-        body="Are you sure you want to delete this record?"
-        show={showAreYouSureDialog}
-        onHide={() => setShowAreYouSureDialog(false)}
-        onYes={() => deleteRow()}
-      />
-      <BranchesEditDialogComponent
-        entity={_.find(data, { _id: selectedEntityIndex })}
-        show={showEditDialog}
-        onHide={() => setShowEditDialog(false)}
-        onEditResult={onEditResult}
-      />
-      <BranchesCreateDialogComponent
-        entity={newRecord}
-        onCreateResult={onCreateResult}
-        show={showCreateDialog}
-        onHide={() => setShowCreateDialog(false)}
-      />
-      <BranchesFakerDialogComponent
-        show={showFakerDialog}
-        onHide={() => setShowFakerDialog(false)}
-        onFakerCreateResults={onFakerCreateResults}
-      />
-      <BranchesSeederDialogComponent
-        show={showSeederDialog}
-        onHide={() => setShowSeederDialog(false)}
-        onSeederResults={onSeederResults}
-      />
-      <AreYouSureDialog
-        header={`Drop ${data?.length} records`}
-        body={`Are you sure you want to drop ${data?.length} records?`}
-        show={showDeleteAllDialog}
-        onHide={() => setShowDeleteAllDialog(false)}
-        onYes={() => deleteAll()}
-        loading={loading}
-      />
+      
       <HelpbarService
         isVisible={isHelpSidebarVisible}
         onToggle={toggleHelpSidebar}
-        serviceName="branches"
+        serviceName="loginHistory"
       />
     </div>
   );
@@ -658,4 +480,4 @@ const mapDispatch = (dispatch) => ({
   set: (data) => dispatch.cache.set(data),
 });
 
-export default connect(mapState, mapDispatch)(BranchesPage);
+export default connect(mapState, mapDispatch)(LoginHistory);

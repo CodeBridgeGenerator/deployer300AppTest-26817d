@@ -41,8 +41,9 @@ const PermissionServicesPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);  
-const [permissions, setPermissions] = useState({});  const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
   const [selectedUser, setSelectedUser] = useState();
 
   const [refresh, setRefresh] = useState(false);
