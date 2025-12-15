@@ -86,6 +86,7 @@ const LoginPage = (props) => {
           .login({ email: loginEmail, password })
           .then(async (res) => {
             try {
+              await props.verifyProfileOrCreate();
               await client.service("loginHistory").create({
                 userId: res.user._id,
                 device: deviceDetails.device,
@@ -138,6 +139,8 @@ const LoginPage = (props) => {
       setLoading(false);
     }
   };
+
+
 
   const validate = () => {
     let isValid = true;
@@ -470,6 +473,7 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   login: (data) => dispatch.auth.login(data),
   alert: (data) => dispatch.toast.alert(data),
+  verifyProfileOrCreate: (data) => dispatch.user.createProfileAfterLogin(data),
 });
 
 export default connect(mapState, mapDispatch)(LoginPage);

@@ -7,6 +7,7 @@ module.exports = function (app) {
       userId: {
         type: Schema.Types.ObjectId,
         ref: "users",
+        required: true,
         comment:
           "User, dropdown, true, true, true, true, true, true, true, users, users, one-to-one, name,",
       },

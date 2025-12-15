@@ -15,14 +15,14 @@ const PageWrapper = (props) => {
       ...getNavigatorInfo(),
       marketCode: params?.marketCode ? params.marketCode : "untracked",
       isLoggedIn: props?.isLoggedIn ?? false,
-      userId: props.user?._id,
+      userId: null,
     };
     // console.log(data)
     createRecord(data);
   }, []);
 
-  const createRecord = async (data) =>  {
-    await client
+  const createRecord =  (data) =>  {
+     client
       .service("userTrackerId")
       .create(data)
       .catch((error) => {

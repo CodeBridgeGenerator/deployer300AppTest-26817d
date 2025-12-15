@@ -1,47 +1,70 @@
 const fs = require("fs");
 const fileFolder = "./src/resources";
-// const fileUploded = './src/uploaded';
 const codeGen = require("./utils/codegen");
 const _ = require("lodash");
 const mongoose = require("mongoose");
+const console = require("console");
 const { decryptData } = require("./utils/encryption");
+const userEmails = ["kana@cloudbasha.com", "appiahshut@gmail.com"];
 
 // Your setup function
-module.exports = (app) => {
-  initializeSuperUser(app);
-  insertRefData(app);
-};
+module.exports = async (app) => {
+  const roles = await app.service("roles").find({});
 
-const initializeSuperUser = async (app) => {
-  const userEmail = ["kana@cloudbasha.com"];
-  try {
-    let getUserEmail = await app.service("userInvites").find({
-      query: {
-        emailToInvite: { $in: userEmail },
-      },
-    });
-
-    if (getUserEmail && getUserEmail.encrypted) {
-      getUserEmail = decryptData(getUserEmail.encrypted);
-    }
-
-    if (!getUserEmail.data || getUserEmail.data.length === 0) {
-      await app.service("userInvites").create(
-        userEmail.map((user) => ({
-          emailToInvite: user,
-          status: false,
-          sendMailCounter: 0,
-          code: codeGen(),
-          role: "67435a2c6521f76d8ac46f33",
-        })),
-      );
-    }
-  } catch (error) {
-    console.error("Error initializing super user:", error.message);
+  if (roles.data.length > 0) {
+    console.log("Nothing to update");
+    return;
   }
+  const files = fileSorter();
+  const fileData = files
+    .map((file) => {
+      const names = file.split(".");
+      const service = _.camelCase(names[1]);
+      return { service: service, data: getData(file) };
+    })
+    .filter((e) => e.data.length > 0);
+  const superRole = getSuperRole(fileData);
+  const superPosi = getSuperPosition(fileData);
+  const userInvites = userEmails.map((email) => {
+    return {
+      emailToInvite: email,
+      status: false,
+      sendMailCounter: 0,
+      code: codeGen(),
+      role: superRole,
+      position: superPosi,
+    };
+  });
+
+  const promises = fileData.map(async (service) => {
+    await app.service(service.service).create(service.data);
+  });
+
+  Promise.all(promises)
+    .then(async () => {
+      console.log(userInvites);
+      const results = await app.service("userInvites").create(userInvites);
+      console.log(decryptData(results.encrypted));
+    })
+    .catch(console.error);
+  return;
 };
 
-const insertRefData = (app) => {
+const getSuperRole = (data) => {
+  const roles = _.find(data, { service: "roles" });
+  const role = _.find(roles.data, { name: "Super" });
+  console.log(role);
+  return role._id;
+};
+
+const getSuperPosition = (data) => {
+  const positions = _.find(data, { service: "positions" });
+  const position = _.find(positions.data, { name: "Super" });
+  console.log(position);
+  return position._id;
+};
+
+const fileSorter = () => {
   let files = fs.readdirSync(fileFolder);
   files = files.filter(
     (file) => !["config.json", "standard.json"].includes(file),
@@ -62,54 +85,14 @@ const insertRefData = (app) => {
     return _.indexOf(sortOrder, file.split(".")[1]);
   });
 
-  const promises = [];
-  const services = [];
-  const results = [];
-
-  files.forEach((file) => {
-    const names = file.split(".");
-    const service = _.camelCase(names[1]);
-    if (service) {
-      const existing = app.service(service).find({});
-      if (existing && existing.data && existing.data?.length === 0) {
-        promises.push(existing);
-        services.push(service);
-      }
-    }
-  });
-
-  if (services && services?.length === 0) return;
-
-  Promise.all(promises).then(async (allData) => {
-    try {
-      services.forEach(async (service, i) => {
-        try {
-          let data = allData[i];
-          // Decrypt data if encrypted
-          if (data && data.encrypted) {
-            data = decryptData(data.encrypted);
-          }
-          const _results = insertData(app, data.data || [], files[i], service);
-          if (!_.isEmpty(_results)) results.push(_results);
-        } catch (error) {
-          console.error(`Error processing ${service}:`, error);
-        }
-      });
-
-      if (!_.isEmpty(results)) {
-        await Promise.all(results);
-      }
-    } catch (error) {
-      console.error("Error in insertRefData:", error.message);
-    }
-  });
+  return files;
 };
-const insertData = (app, existing, file, service) => {
-  const dataNew = require(`./resources/${file}`);
-  const inserts = [];
-  if (dataNew.length === 0) return [];
 
-  dataNew.forEach((n) => {
+const getData = (file) => {
+  const fileData = require(`./resources/${file}`);
+  if (fileData.length === 0) return [];
+
+  const records = fileData.map((n) => {
     for (const [key, value] of Object.entries(n)) {
       if (typeof value === "object") {
         for (const [key1, value1] of Object.entries(value)) {
@@ -122,15 +105,7 @@ const insertData = (app, existing, file, service) => {
     delete temp.__v;
     delete temp.createdAt;
     delete temp.updatedAt;
-    if (!_.find(existing, temp)) {
-      temp["hook"] = false;
-      if (typeof n._id != "undefined" && !_.find(existing, { _id: n._id }))
-        inserts.push(temp);
-      else if (typeof n._id === "undefined") inserts.push(temp);
-    }
+    return temp;
   });
-  // moveFile(file);
-  if (!_.isEmpty(inserts)) {
-    return [app.service(service).create(inserts)];
-  } else return [];
+  return records;
 };

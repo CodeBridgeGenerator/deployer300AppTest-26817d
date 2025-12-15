@@ -56,6 +56,8 @@ const ProfilesDataTable = ({
   selectedUser,
   setPaginatorRecordsNo,
   paginatorRecordsNo,
+  hasServicePermission,
+  hasServiceFieldsPermission,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -159,7 +161,7 @@ const ProfilesDataTable = ({
           _selectedItems.push(rowData);
         } else {
           _selectedItems = _selectedItems.filter(
-            (item) => item._id !== rowData._id,
+            (item) => item._id !== rowData._id
           );
         }
         setSelectedItems(_selectedItems);
@@ -238,11 +240,11 @@ const ProfilesDataTable = ({
   const confirmDelete = async () => {
     try {
       const promises = selectedItems.map((item) =>
-        client.service("profiles").remove(item._id),
+        client.service("profiles").remove(item._id)
       );
       await Promise.all(promises);
       const updatedData = data.filter(
-        (item) => !selectedItems.find((selected) => selected._id === item._id),
+        (item) => !selectedItems.find((selected) => selected._id === item._id)
       );
       setData(updatedData);
       setSelectedDelete(selectedItems.map((item) => item._id));
@@ -255,79 +257,19 @@ const ProfilesDataTable = ({
     }
   };
 
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      setIsLoadingPermissions(true);
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const profilesPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "profiles" },
-            });
-
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = profilesPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = profilesPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = profilesPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-          } else {
-            console.log("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      } finally {
-        setIsLoadingPermissions(false);
-      }
-    };
-
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
+  const fetchServicePermissions = async () => {
+    //hasPermission
+    const servicePermissions = await hasServicePermission("profiles");
+    const fieldPermissions = await hasServiceFieldsPermission("profiles");
+    setIsLoadingPermissions(servicePermissions?.read);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
 
   useEffect(() => {
-    const fetchFieldPermissions = async () => {
-      try {
-        const userPermissions = props.permServices;
-        const filteredPermissions = userPermissions.data.filter(
-          (perm) =>
-            perm.servicePermissionId.roleId === selectedUser &&
-            perm.service === "profiles",
-        );
-        if (filteredPermissions.length > 0) {
-          setFieldPermissions(filteredPermissions[0]);
-        }
-        console.log("FieldPermissions", fieldPermissions);
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
-    };
-
-    fetchFieldPermissions();
-    if (selectedUser) {
-      fetchFieldPermissions();
-    }
+    fetchServicePermissions();
   }, [selectedUser]);
 
   const handleMessage = () => {
@@ -343,7 +285,7 @@ const ProfilesDataTable = ({
 
     try {
       const dataToCopy = selectedItems.map((item) =>
-        _.omit(item, ["_id", "createdAt", "updatedAt"]),
+        _.omit(item, ["_id", "createdAt", "updatedAt"])
       );
       await navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
       toast.current.show({
@@ -940,13 +882,15 @@ const ProfilesDataTable = ({
 
 const mapState = (state) => {
   const { user, isLoggedIn } = state.auth;
-  const { permFields, permServices } = state.perms;
-  return { user, isLoggedIn , permFields, permServices};
+  return { user, isLoggedIn };
 };
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
 });
 
 export default connect(mapState, mapDispatch)(ProfilesDataTable);
-

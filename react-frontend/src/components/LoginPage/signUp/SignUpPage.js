@@ -31,6 +31,8 @@ const SignUpPage = (props) => {
   const [isEmail, setEmailOrStaffId] = useState(true);
   const [isReadyToSendMail, setIsReadyToSendMail] = useState(false);
 
+  const domain = process.env.REACT_APP_EMAIL_DOMAIN;
+
   const toast = useRef(null);
   const showSuccess = (message) => {
     toast.current.show({
@@ -64,12 +66,12 @@ const SignUpPage = (props) => {
     });
   };
 
-  const onFinishStepOne = async () => {
+  const onFinishStepOne = () => {
     let finalEmail = email;
 
     if (!isEmail) {
       // If signing up with Staff ID, append the domain
-      finalEmail = `${email}@EXAMPLE.com.my`;
+      finalEmail = `${email}@${domain}`;
     }
 
     if (!emailRegex.test(finalEmail)) {
@@ -89,18 +91,26 @@ const SignUpPage = (props) => {
 
   useEffect(() => {
     if (isReadyToSendMail && email) {
-      resendMail();
-      setIsReadyToSendMail(false); // Reset the flag after sending the mail
+      if (step === 1) {
+        resendMail();
+        setIsReadyToSendMail(false); // Reset the flag after sending the mail
+      }
     }
   }, [email, isReadyToSendMail]);
 
   const validateEmail = async () => {
-    const loginEmailData = await client.service("userInvites").find({
-      query: {
-        emailToInvite: email,
-      },
-    });
-
+    let loginEmailData = {};
+    try {
+      loginEmailData = await client.service("userInvites").find({
+        query: {
+          emailToInvite: email,
+        },
+      });
+      // console.log(loginEmailData);
+    } catch (err) {
+      console.log(err);
+    }
+    if (!loginEmailData) return;
     if (loginEmailData?.data?.length === 0) {
       // No record exists, so create a new one with a generated code.
       const _login = {
@@ -113,7 +123,7 @@ const SignUpPage = (props) => {
       loginEmailData.data = [data];
     } else {
       // Record exists. Check if the 'code' field is missing or falsy.
-      if (!loginEmailData.data[0].code) {
+      if (!loginEmailData?.data[0]?.code) {
         const patchedRecord = await client
           .service("userInvites")
           .patch(loginEmailData.data[0]._id, {
@@ -144,6 +154,7 @@ const SignUpPage = (props) => {
     if (!validateEmailSending(loginEmailData)) return;
     if (!validateCode(loginEmailData)) return;
     setSysCode(loginEmailData.code);
+
     const _mail = {
       name: "onCodeVerifyEmail",
       type: "signup",
@@ -160,8 +171,9 @@ const SignUpPage = (props) => {
       subject: "email code verification process",
       templateId: "onCodeVerify",
     };
+
     setLoading(true);
-    await client.service("mailQues").create(_mail);
+    client.service("mailQues").create(_mail);
     props.alert({
       title: "Verification email sent.",
       type: "success",
@@ -171,6 +183,7 @@ const SignUpPage = (props) => {
     setLoading(false);
     setStep(2);
     showSuccess(`Verification email sent to ${email}`);
+    return;
   };
 
   const onFinishStepTwo = () => {
@@ -213,7 +226,7 @@ const SignUpPage = (props) => {
       isValid = false;
     } else if (password.length < 6) {
       setPasswordError(
-        "Must be at least 6 characters long and have at least one letter, digit, uppercase, lowercase and symbol",
+        "Must be at least 6 characters long and have at least one letter, digit, uppercase, lowercase and symbol"
       );
       isValid = false;
     }
@@ -231,16 +244,12 @@ const SignUpPage = (props) => {
     if (validate()) {
       try {
         if (user?.data?.length === 0) {
-          props
-            .createUser({
-              name,
-              email: email,
-              password,
-              status: true,
-            })
-            .then(async () => {
-              navigate("/login");
-            });
+          props.createUser({
+            name,
+            email: email,
+            password,
+            status: true,
+          });
           props.alert({
             title: "User account created successfully.",
             type: "success",

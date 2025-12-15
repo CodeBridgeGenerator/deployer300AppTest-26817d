@@ -352,9 +352,10 @@ const AppTopbar = (props) => {
 
     const selectedProfile = profiles.find((profile) => profile?._id === userId);
     const selectedRole = selectedProfile?.position?.roleId || "Unknown Role";
-
+console.debug("Selected user profile:", selectedProfile);
     try {
       await updateCache(userId, selectedRole);
+      props.setProfile(selectedProfile);
       console.debug("Cache updated successfully for user:", userId);
     } catch (error) {
       console.error("Error updating cache:", error);
@@ -770,6 +771,7 @@ const mapDispatch = (dispatch) => ({
   logout: () => dispatch.auth.logout(),
   getCache: () => dispatch.cache.get(),
   setCache: (data) => dispatch.cache.set(data),
+  setProfile: (profile) => dispatch.perms.setProfile(profile),
 });
 
 export default connect(mapState, mapDispatch)(AppTopbar);

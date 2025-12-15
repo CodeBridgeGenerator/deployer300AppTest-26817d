@@ -17,22 +17,18 @@ module.exports = function (app) {
         comment:
           "Status, p, false, false, false, null, null, true, true, , , , ,",
       },
-      positions: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "positions",
-          comment:
-            "Positions, dropdown, false, true, true, true, true, true, true, positions, positions, one-to-one, name,",
-        },
-      ],
-      roles: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "roles",
-          comment:
-            "Roles, dropdown, false, true, true, true, true, true, true, roles, roles, one-to-one, name,",
-        },
-      ],
+      position: {
+        type: Schema.Types.ObjectId,
+        ref: "positions",
+        comment:
+          "Positions, dropdown, false, true, true, true, true, true, true, positions, positions, one-to-one, name,",
+      },
+      role: {
+        type: Schema.Types.ObjectId,
+        ref: "roles",
+        comment:
+          "Roles, dropdown, false, true, true, true, true, true, true, roles, roles, one-to-one, name,",
+      },
       company: {
         type: Schema.Types.ObjectId,
         ref: "companies",

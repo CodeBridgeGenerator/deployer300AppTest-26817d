@@ -3,6 +3,7 @@ const logger = require("./logger");
 
 if (!process.env.MONGODB_URL)
   throw { message: "Environmental variable 'MONGODB_URL' is required." };
+else console.log(process.env.MONGODB_URL);
 
 module.exports = function (app) {
   mongoose.connect(process.env.MONGODB_URL).catch((err) => {

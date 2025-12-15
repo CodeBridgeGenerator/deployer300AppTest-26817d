@@ -120,25 +120,7 @@ const ProfilesPage = (props) => {
           $limit: 10000,
           $sort: { name: 1 },
           userId: urlParams.singleUsersId,
-          // department: urlParams.singleDepartmentsId,
-          // section: urlParams.singleSectionsId,
-          // position: urlParams.singlePositionsId,
-          // manager: urlParams.singleUsersId,
-          // company: urlParams.singleCompaniesId,
-          // branch: urlParams.singleBranchesId,
-          // address: urlParams.singleUserAddressesId,
-          // phone: urlParams.singleUserPhonesId,
           $populate: [
-            // {
-            //   path: "createdBy",
-            //   service: "users",
-            //   select: ["name"],
-            // },
-            // {
-            //   path: "updatedBy",
-            //   service: "users",
-            //   select: ["name"],
-            // },
             {
               path: "userId",
               service: "users",
@@ -291,8 +273,8 @@ const ProfilesPage = (props) => {
           setLoading(false);
           props.hide();
           console.debug({ error });
-        }),
-      ),
+        })
+      )
     );
     props.hide();
     setLoading(false);
@@ -462,6 +444,8 @@ const ProfilesPage = (props) => {
 
   useEffect(() => {
     get();
+    console.log(props.hasServicePermission("profiles"));
+    setPermissions(props.hasServicePermission("profiles"));
   }, []);
 
   const get = async () => {
@@ -475,14 +459,14 @@ const ProfilesPage = (props) => {
 
     if (currentCache && selectedUser) {
       const selectedUserProfile = currentCache.profiles.find(
-        (profile) => profile.profileId === selectedUser,
+        (profile) => profile.profileId === selectedUser
       );
 
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
           "preferences.settings.profiles.paginatorRecordsNo",
-          10,
+          10
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
         // console.debug("PaginatorRecordsNo from cache:", paginatorRecordsNo);
@@ -499,7 +483,7 @@ const ProfilesPage = (props) => {
       const paginatorRecordsNo = _.get(
         profileResponse,
         "preferences.settings.profiles.paginatorRecordsNo",
-        10,
+        10
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
       // console.debug("PaginatorRecordsNo from service:", paginatorRecordsNo);
@@ -518,14 +502,14 @@ const ProfilesPage = (props) => {
 
       if (currentCache && selectedUser) {
         const selectedUserProfileIndex = currentCache.profiles.findIndex(
-          (profile) => profile.profileId === selectedUser,
+          (profile) => profile.profileId === selectedUser
         );
 
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
             "preferences.settings.profiles.paginatorRecordsNo",
-            paginatorRecordsNo,
+            paginatorRecordsNo
           );
 
           props.set(currentCache);
@@ -538,55 +522,6 @@ const ProfilesPage = (props) => {
     };
     updateCache();
   }, [paginatorRecordsNo, selectedUser]);
-
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const companyPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "profiles" },
-            });
-          // console.debug("companyPermissions", companyPermissions);
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = companyPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-            console.debug("userPermissions", userPermissions);
-          } else {
-            console.debug("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
-    };
-
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
 
   return (
     <div className="mt-5">
@@ -602,7 +537,7 @@ const ProfilesPage = (props) => {
           {permissions.read ? (
             <SplitButton
               model={menuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
               )}
               dropdownIcon="pi pi-ellipsis-h"
               buttonClassName="hidden"
@@ -618,7 +553,7 @@ const ProfilesPage = (props) => {
             />{" "}
             <SplitButton
               model={filterMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
               )}
               dropdownIcon={
                 <img
@@ -632,7 +567,7 @@ const ProfilesPage = (props) => {
             ></SplitButton>
             <SplitButton
               model={sortMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
               )}
               dropdownIcon={
                 <img
@@ -751,6 +686,8 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
   get: () => dispatch.cache.get(),
