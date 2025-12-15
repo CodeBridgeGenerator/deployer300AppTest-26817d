@@ -63,9 +63,9 @@ import SingleErrorLogsPage from '../components/cb_components/ErrorLogsPage/Singl
 import ErrorLogProjectLayoutPage from '../components/cb_components/ErrorLogsPage/ErrorLogProjectLayoutPage';
 import UserChangePasswordProjectLayoutPage from '../components/cb_components/UserChangePasswordPage/UserChangePasswordProjectLayoutPage';
 import AssetsProjectLayoutPage from '../components/cb_components/AssetsPage/AssetsProjectLayoutPage';
-import SingleAssetsPage from '../components/cb_components/AssetsPage/SingleDocumentStoragesPage';
-import MediaProjectLayoutPage from '../components/cb_components/MediaPage/DocumentStorageProjectLayoutPage';
-import SingleMediaPage from '../components/cb_components/MediaPage/SingleDocumentStoragesPage';
+import SingleAssetsPage from '../components/cb_components/AssetsPage/SingleAssetPage';
+import MediaProjectLayoutPage from '../components/cb_components/MediaPage/MediaProjectLayoutPage';
+import SingleMediaPage from '../components/cb_components/MediaPage/SingleMediaPage';
 import SingleAuditsPage from '../components/cb_components/AuditsPage/SingleAuditsPage';
 import AuditProjectLayoutPage from '../components/cb_components/AuditsPage/AuditProjectLayoutPage';
 

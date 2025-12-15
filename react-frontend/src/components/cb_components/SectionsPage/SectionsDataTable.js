@@ -179,8 +179,6 @@ const SectionsDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      
-
       return (
         <div>
           <span>Page</span>

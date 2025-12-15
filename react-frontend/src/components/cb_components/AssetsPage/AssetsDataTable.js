@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { Link, useState, useRef, useEffect } from "react";
 import { connect } from "react-redux";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import _ from "lodash";
 import { Button } from "primereact/button";
-import { Skeleton } from "primereact/skeleton";
+import { useParams } from "react-router-dom";
+import _ from "lodash";
 
-const DocumentStoragesDataTable = ({
+const AssetsDataTable = ({
   items,
   onRowDelete,
   onRowClick,
@@ -29,8 +28,6 @@ const DocumentStoragesDataTable = ({
     setIsLoadingPermissions(false);
     setPermissions(servicePermissions);
     setFieldPermissions(fieldPermissions);
-    console.log("Service Permissions:", servicePermissions);
-    console.log("Field Permissions:", fieldPermissions);
   };
 
   useEffect(() => {
@@ -64,21 +61,6 @@ const DocumentStoragesDataTable = ({
       className="p-button-rounded p-button-danger p-button-text"
     />
   );
-
-  const renderSkeleton = () => {
-    return (
-      <DataTable
-        value={Array.from({ length: 5 })}
-        className="p-datatable-striped"
-      >
-        <Column body={<Skeleton />} />
-        <Column body={<Skeleton />} />
-        <Column body={<Skeleton />} />
-        <Column body={<Skeleton />} />
-        <Column body={<Skeleton />} />
-      </DataTable>
-    );
-  };
 
   return (
     <>
@@ -172,15 +154,10 @@ const DocumentStoragesDataTable = ({
           </DataTable>
         </>
       ) : (
-        <p>You do not have permission to view Document Storages.</p>
+        <p>You do not have permissions to view this data.</p>
       )}
     </>
   );
-};
-
-const mapState = (state) => {
-  const { user, isLoggedIn } = state.auth;
-  return { user, isLoggedIn };
 };
 
 const mapDispatch = (dispatch) => ({
@@ -191,4 +168,4 @@ const mapDispatch = (dispatch) => ({
     dispatch.perms.hasServiceFieldsPermission(service),
 });
 
-export default connect(mapState, mapDispatch)(DocumentStoragesDataTable);
+export default connect(mapState, mapDispatch)(AssetsDataTable);

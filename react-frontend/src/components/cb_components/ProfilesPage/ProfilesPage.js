@@ -49,7 +49,6 @@ const ProfilesPage = (props) => {
   const [selectedDelete, setSelectedDelete] = useState([]);
   const [permissions, setPermissions] = useState({});
   const [selectedUser, setSelectedUser] = useState();
-
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
 
@@ -126,7 +125,7 @@ const ProfilesPage = (props) => {
             {
               path: "userId",
               service: "users",
-              select: ["name"],
+              select: ["name", "email"],
             },
             {
               path: "department",

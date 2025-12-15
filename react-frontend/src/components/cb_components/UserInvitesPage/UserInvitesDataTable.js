@@ -1,6 +1,6 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import _ from "lodash";
 import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
@@ -21,6 +21,7 @@ import { Toast } from "primereact/toast";
 import DeleteImage from "../../../assets/media/Delete.png";
 import { connect } from "react-redux";
 import { Checkbox } from "primereact/checkbox";
+import { Skeleton } from "primereact/skeleton";
 
 const UserInvitesDataTable = ({
   items,
@@ -60,9 +61,25 @@ const UserInvitesDataTable = ({
   const [showDialog, setShowDialog] = useState(false);
   const [data, setData] = useState([]);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [triggerDownload, setTriggerDownload] = useState(false);
   const [permissions, setPermissions] = useState({});
   const [fieldPermissions, setFieldPermissions] = useState({});
-  const [triggerDownload, setTriggerDownload] = useState(false);
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, []);
 
   const header = (
     <div
@@ -171,8 +188,6 @@ const UserInvitesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      
-
       return (
         <div>
           <span>Page</span>
@@ -325,45 +340,64 @@ const UserInvitesDataTable = ({
       life: 3000,
     });
   };
-  
+
+  const renderSkeleton = () => {
+    return (
+      <DataTable
+        value={Array.from({ length: 5 })}
+        className="p-datatable-striped"
+      >
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+      </DataTable>
+    );
+  };
+
   return (
     <>
-      <DataTable
-        value={items}
-        ref={dt}
-        removableSort
-        onRowClick={onRowClick}
-        scrollable
-        rowHover
-        stripedRows
-        size={"small"}
-        paginator
-        rows={paginatorRecordsNo}
-        rowsPerPageOptions={[10, 50, 250, 500]}
-        paginatorTemplate={template1}
-        rowClassName="cursor-pointer"
-        alwaysShowPaginator={!urlParams.singleUsersId}
-        selection={selectedItems}
-        onSelectionChange={(e) => setSelectedItems(e.value)}
-        onCreateResult={onCreateResult}
-        globalFilter={globalFilter}
-        header={header}
-      >
-        <Column
-          selectionMode="multiple"
-          headerStyle={{ width: "3rem" }}
-          body={checkboxTemplate}
-        />
-        <Column
-          field="emailToInvite"
-          header="Invitation Email"
-          body={pTemplate0}
-          filter={selectedFilterFields.includes("emailToInvite")}
-          // hidden={selectedHideFields?.includes("emailToInvite")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        {/* <Column
+      {isLoadingPermissions ? (
+        renderSkeleton()
+      ) : permissions.read ? (
+        <>
+          <DataTable
+            value={items}
+            ref={dt}
+            removableSort
+            onRowClick={onRowClick}
+            scrollable
+            rowHover
+            stripedRows
+            size={"small"}
+            paginator
+            rows={paginatorRecordsNo}
+            rowsPerPageOptions={[10, 50, 250, 500]}
+            paginatorTemplate={template1}
+            rowClassName="cursor-pointer"
+            alwaysShowPaginator={!urlParams.singleUsersId}
+            selection={selectedItems}
+            onSelectionChange={(e) => setSelectedItems(e.value)}
+            onCreateResult={onCreateResult}
+            globalFilter={globalFilter}
+            header={header}
+          >
+            <Column
+              selectionMode="multiple"
+              headerStyle={{ width: "3rem" }}
+              body={checkboxTemplate}
+            />
+            <Column
+              field="emailToInvite"
+              header="Invitation Email"
+              body={pTemplate0}
+              filter={selectedFilterFields.includes("emailToInvite")}
+              // hidden={selectedHideFields?.includes("emailToInvite")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            {/* <Column
           field="status"
           header="Status"
           body={pTemplate1}
@@ -371,374 +405,378 @@ const UserInvitesDataTable = ({
           // hidden={selectedHideFields?.includes("status")}
           style={{ minWidth: "8rem" }}
         /> */}
-        <Column
-          field="code"
-          header="Code"
-          body={pTemplate2}
-          filter={selectedFilterFields.includes("code")}
-          // hidden={selectedHideFields?.includes("code")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="sendMailCounter"
-          header="SendMailCounter"
-          body={p_numberTemplate3}
-          filter={selectedFilterFields.includes("sendMailCounter")}
-          // hidden={selectedHideFields?.includes("sendMailCounter")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column header="Edit" body={editTemplate} />
-        <Column header="Delete" body={deleteTemplate} />
-        {/*<Column field="createdAt" header="created" body={pCreatedAt} sortable style={{ minWidth: "8rem" }} />*/}
-        {/*<Column field="updatedAt" header="updated" body={pUpdatedAt} sortable style={{ minWidth: "8rem" }} />*/}
-        {/*<Column field="createdBy" header="createdBy" body={pCreatedBy} sortable style={{ minWidth: "8rem" }} />*/}
-        {/*<Column field="updatedBy" header="updatedBy" body={pUpdatedBy} sortable style={{ minWidth: "8rem" }} />*/}
-      </DataTable>
-      {selectedItems.length > 0 ? (
-        <div
-          className="card center"
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: 200,
-            right: 0,
-            margin: "0 auto",
-            width: "51rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px",
-            fontSize: "14px",
-            fontFamily: "Arial, sans-serif",
-            color: "#2A4454",
-            backgroundColor: "#fff",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              border: "1px solid #2A4454",
-              padding: "5px",
-              borderRadius: "5px",
-            }}
-          >
-            {selectedItems.length} selected
-            <span
-              className="pi pi-times"
+            <Column
+              field="code"
+              header="Code"
+              body={pTemplate2}
+              filter={selectedFilterFields.includes("code")}
+              // hidden={selectedHideFields?.includes("code")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="sendMailCounter"
+              header="SendMailCounter"
+              body={p_numberTemplate3}
+              filter={selectedFilterFields.includes("sendMailCounter")}
+              // hidden={selectedHideFields?.includes("sendMailCounter")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column header="Edit" body={editTemplate} />
+            <Column header="Delete" body={deleteTemplate} />
+            {/*<Column field="createdAt" header="created" body={pCreatedAt} sortable style={{ minWidth: "8rem" }} />*/}
+            {/*<Column field="updatedAt" header="updated" body={pUpdatedAt} sortable style={{ minWidth: "8rem" }} />*/}
+            {/*<Column field="createdBy" header="createdBy" body={pCreatedBy} sortable style={{ minWidth: "8rem" }} />*/}
+            {/*<Column field="updatedBy" header="updatedBy" body={pUpdatedBy} sortable style={{ minWidth: "8rem" }} />*/}
+          </DataTable>
+          {selectedItems.length > 0 ? (
+            <div
+              className="card center"
               style={{
-                cursor: "pointer",
-                marginLeft: "10px",
+                position: "fixed",
+                bottom: "20px",
+                left: 200,
+                right: 0,
+                margin: "0 auto",
+                width: "51rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px",
+                fontSize: "14px",
+                fontFamily: "Arial, sans-serif",
                 color: "#2A4454",
+                backgroundColor: "#fff",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                zIndex: 1000,
               }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #2A4454",
+                  padding: "5px",
+                  borderRadius: "5px",
+                }}
+              >
+                {selectedItems.length} selected
+                <span
+                  className="pi pi-times"
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    color: "#2A4454",
+                  }}
+                  onClick={() => {
+                    deselectAllRows();
+                  }}
+                />
+              </div>
+
+              {/* New buttons section */}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {/* Copy button */}
+                <Button
+                  label="Copy"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={CopyIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  // tooltip="Copy"
+                  onClick={handleCopy}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* Duplicate button */}
+                <Button
+                  label="Duplicate"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={DuplicateIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  // tooltip="Duplicate"
+                  onClick={handleDuplicate}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* Export button */}
+                <Button
+                  label="Export"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={ExportIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  onClick={handleExport}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* Message button */}
+                <Button
+                  label="Message"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={InviteIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  onClick={handleMessage}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* InboxCreateDialogComponent */}
+                <InboxCreateDialogComponent
+                  show={showDialog}
+                  onHide={handleHideDialog}
+                  serviceInbox="userInvites"
+                  onCreateResult={onCreateResult}
+                  // selectedItemsId={selectedItems.map(item => item._id)}
+                  selectedItemsId={selectedItems}
+                />
+
+                {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
+                <Button
+                  label="Delete"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={DeleteIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  onClick={handleDelete}
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    gap: "4px",
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          <Dialog
+            header="Upload UserInvites Data"
+            visible={showUpload}
+            onHide={() => setShowUpload(false)}
+          >
+            <UploadService
+              user={user}
+              serviceName="userInvites"
+              onUploadComplete={() => {
+                setShowUpload(false); // Close the dialog after upload
+              }}
+            />
+          </Dialog>
+
+          <Dialog
+            header="Search UserInvites"
+            visible={searchDialog}
+            onHide={() => setSearchDialog(false)}
+          >
+            Search
+          </Dialog>
+          <Dialog
+            header="Filter Users"
+            visible={showFilter}
+            onHide={() => setShowFilter(false)}
+          >
+            <div className="card flex justify-content-center">
+              <MultiSelect
+                value={selectedFilterFields}
+                onChange={(e) => setSelectedFilterFields(e.value)}
+                options={fields}
+                optionLabel="name"
+                optionValue="value"
+                filter
+                placeholder="Select Fields"
+                maxSelectedLabels={6}
+                className="w-full md:w-20rem"
+              />
+            </div>
+            <Button
+              text
+              label="save as pref"
               onClick={() => {
-                deselectAllRows();
+                onClickSaveFilteredfields(selectedFilterFields);
+                setSelectedFilterFields(selectedFilterFields);
+                setShowFilter(false);
               }}
-            />
-          </div>
+            ></Button>
+          </Dialog>
 
-          {/* New buttons section */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Copy button */}
-            <Button
-              label="Copy"
-              labelposition="right"
-              icon={
-                <img
-                  src={CopyIcon}
-                  style={{
-                    marginRight: "4px",
-                    width: "1em",
-                    height: "1em",
-                  }}
-                />
-              }
-              // tooltip="Copy"
-              onClick={handleCopy}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
-
-            {/* Duplicate button */}
-            <Button
-              label="Duplicate"
-              labelposition="right"
-              icon={
-                <img
-                  src={DuplicateIcon}
-                  style={{
-                    marginRight: "4px",
-                    width: "1em",
-                    height: "1em",
-                  }}
-                />
-              }
-              // tooltip="Duplicate"
-              onClick={handleDuplicate}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
-
-            {/* Export button */}
-            <Button
-              label="Export"
-              labelposition="right"
-              icon={
-                <img
-                  src={ExportIcon}
-                  style={{
-                    marginRight: "4px",
-                    width: "1em",
-                    height: "1em",
-                  }}
-                />
-              }
-              onClick={handleExport}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
-
-            {/* Message button */}
-            <Button
-              label="Message"
-              labelposition="right"
-              icon={
-                <img
-                  src={InviteIcon}
-                  style={{
-                    marginRight: "4px",
-                    width: "1em",
-                    height: "1em",
-                  }}
-                />
-              }
-              onClick={handleMessage}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
-
-            {/* InboxCreateDialogComponent */}
-            <InboxCreateDialogComponent
-              show={showDialog}
-              onHide={handleHideDialog}
-              serviceInbox="userInvites"
-              onCreateResult={onCreateResult}
-              // selectedItemsId={selectedItems.map(item => item._id)}
-              selectedItemsId={selectedItems}
-            />
-
-            {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
-            <Button
-              label="Delete"
-              labelposition="right"
-              icon={
-                <img
-                  src={DeleteIcon}
-                  style={{
-                    marginRight: "4px",
-                    width: "1em",
-                    height: "1em",
-                  }}
-                />
-              }
-              onClick={handleDelete}
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                gap: "4px",
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
-
-      <Dialog
-        header="Upload UserInvites Data"
-        visible={showUpload}
-        onHide={() => setShowUpload(false)}
-      >
-        <UploadService
-          user={user}
-          serviceName="userInvites"
-          onUploadComplete={() => {
-            setShowUpload(false); // Close the dialog after upload
-          }}
-        />
-      </Dialog>
-
-      <Dialog
-        header="Search UserInvites"
-        visible={searchDialog}
-        onHide={() => setSearchDialog(false)}
-      >
-        Search
-      </Dialog>
-      <Dialog
-        header="Filter Users"
-        visible={showFilter}
-        onHide={() => setShowFilter(false)}
-      >
-        <div className="card flex justify-content-center">
-          <MultiSelect
-            value={selectedFilterFields}
-            onChange={(e) => setSelectedFilterFields(e.value)}
-            options={fields}
-            optionLabel="name"
-            optionValue="value"
-            filter
-            placeholder="Select Fields"
-            maxSelectedLabels={6}
-            className="w-full md:w-20rem"
-          />
-        </div>
-        <Button
-          text
-          label="save as pref"
-          onClick={() => {
-            onClickSaveFilteredfields(selectedFilterFields);
-            setSelectedFilterFields(selectedFilterFields);
-            setShowFilter(false);
-          }}
-        ></Button>
-      </Dialog>
-
-      <Dialog
-        header="Hide Columns"
-        visible={showColumns}
-        onHide={() => setShowColumns(false)}
-      >
-        <div className="card flex justify-content-center">
-          <MultiSelect
-            value={selectedHideFields}
-            onChange={(e) => setSelectedHideFields(e.value)}
-            options={fields}
-            optionLabel="name"
-            optionValue="value"
-            filter
-            placeholder="Select Fields"
-            maxSelectedLabels={6}
-            className="w-full md:w-20rem"
-          />
-        </div>
-        <Button
-          text
-          label="save as pref"
-          onClick={() => {
-            onClickSaveHiddenfields(selectedHideFields);
-            setSelectedHideFields(selectedHideFields);
-            setShowColumns(false);
-          }}
-        ></Button>
-      </Dialog>
-      <Toast ref={toast} />
-      <Dialog
-        visible={showDeleteConfirmation}
-        onHide={() => setShowDeleteConfirmation(false)}
-        footer={
-          <div
-            className="flex justify-content-center"
-            style={{ padding: "1rem" }}
+          <Dialog
+            header="Hide Columns"
+            visible={showColumns}
+            onHide={() => setShowColumns(false)}
           >
+            <div className="card flex justify-content-center">
+              <MultiSelect
+                value={selectedHideFields}
+                onChange={(e) => setSelectedHideFields(e.value)}
+                options={fields}
+                optionLabel="name"
+                optionValue="value"
+                filter
+                placeholder="Select Fields"
+                maxSelectedLabels={6}
+                className="w-full md:w-20rem"
+              />
+            </div>
             <Button
-              label="Cancel"
-              onClick={() => setShowDeleteConfirmation(false)}
-              rounded
-              className="p-button-rounded p-button-secondary ml-2"
-              style={{
-                color: "#D30000",
-                borderColor: "#D30000",
-                backgroundColor: "white",
-                width: "200px",
-                marginRight: "2rem",
+              text
+              label="save as pref"
+              onClick={() => {
+                onClickSaveHiddenfields(selectedHideFields);
+                setSelectedHideFields(selectedHideFields);
+                setShowColumns(false);
               }}
-            />
-            <Button
-              label="Delete"
-              onClick={confirmDelete}
-              className="no-focus-effect"
-              rounded
-              style={{ width: "200px" }}
-            />
-          </div>
-        }
-      >
-        <div className="flex flex-column align-items-center">
-          <img
-            src={DeleteImage}
-            alt="Delete Icon"
-            style={{
-              width: "150px",
-              height: "150px",
-              marginBottom: "10px",
-            }}
-          />
-          <span
-            style={{
-              fontWeight: "bold",
-              fontSize: "1.2em",
-              marginBottom: "10px",
-            }}
+            ></Button>
+          </Dialog>
+          <Toast ref={toast} />
+          <Dialog
+            visible={showDeleteConfirmation}
+            onHide={() => setShowDeleteConfirmation(false)}
+            footer={
+              <div
+                className="flex justify-content-center"
+                style={{ padding: "1rem" }}
+              >
+                <Button
+                  label="Cancel"
+                  onClick={() => setShowDeleteConfirmation(false)}
+                  rounded
+                  className="p-button-rounded p-button-secondary ml-2"
+                  style={{
+                    color: "#D30000",
+                    borderColor: "#D30000",
+                    backgroundColor: "white",
+                    width: "200px",
+                    marginRight: "2rem",
+                  }}
+                />
+                <Button
+                  label="Delete"
+                  onClick={confirmDelete}
+                  className="no-focus-effect"
+                  rounded
+                  style={{ width: "200px" }}
+                />
+              </div>
+            }
           >
-            Delete listing?
-          </span>
-          <p style={{ marginBottom: "10px" }}>
-            This action cannot be undone, and all data will be deleted
-            permanently.
-          </p>
-        </div>
-      </Dialog>
+            <div className="flex flex-column align-items-center">
+              <img
+                src={DeleteImage}
+                alt="Delete Icon"
+                style={{
+                  width: "150px",
+                  height: "150px",
+                  marginBottom: "10px",
+                }}
+              />
+              <span
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  marginBottom: "10px",
+                }}
+              >
+                Delete listing?
+              </span>
+              <p style={{ marginBottom: "10px" }}>
+                This action cannot be undone, and all data will be deleted
+                permanently.
+              </p>
+            </div>
+          </Dialog>
 
-      <DownloadCSV
-        data={items}
-        fileName="userInvites"
-        triggerDownload={triggerDownload}
-        setTriggerDownload={setTriggerDownload}
-        selectedData={selectedItems}
-      />
+          <DownloadCSV
+            data={items}
+            fileName="userInvites"
+            triggerDownload={triggerDownload}
+            setTriggerDownload={setTriggerDownload}
+            selectedData={selectedItems}
+          />
+        </>
+      ) : (
+        <div>You do not have permission to view User Invites.</div>
+      )}
     </>
   );
 };

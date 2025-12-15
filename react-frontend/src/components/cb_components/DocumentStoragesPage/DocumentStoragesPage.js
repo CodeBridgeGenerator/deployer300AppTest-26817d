@@ -12,7 +12,7 @@ const DocumentStoragesPage = (props) => {
   const [loading, setLoading] = useState(false);
   const [selectedEntityIndex, setSelectedEntityIndex] = useState(null);
   const [showAreYouSureDialog, setShowAreYouSureDialog] = useState(false);
-
+  const filename = "documentStorages";
   const allowedExtensions = ["pdf", "doc", "docx", "xlsx", "xls", "csv"];
 
   useEffect(() => {
@@ -108,6 +108,7 @@ const DocumentStoragesPage = (props) => {
             onRowDelete={onRowDelete}
             onRowClick={onRowClick}
             loading={loading}
+            filename={filename}
           />
         </div>
       </div>

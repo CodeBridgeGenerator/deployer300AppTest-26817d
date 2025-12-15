@@ -58,14 +58,14 @@ const SingleDocumentStoragesPage = (props) => {
               icon="pi pi-chevron-left"
               onClick={() => goBack()}
             />
-            <h3 className="m-0">Document Storages</h3>
+            <h3 className="m-0">Asset Storages</h3>
           </div>
           {/* ~cb-project-dashboard~ */}
         </div>
         <div className="card w-full">
           <div className="grid ">
             <div className="col-12 md:col-6 lg:col-3">
-              <label className="text-sm text-primary">Document Name</label>
+              <label className="text-sm text-primary">Asset Name</label>
               <p className="m-0 ml-3">{_entity?.name}</p>
             </div>
             <div className="col-12 md:col-6 lg:col-3">

@@ -1,14 +1,42 @@
+import React, { useRef, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useRef } from "react";
+import { connect } from "react-redux";
 import _ from "lodash";
 import { Button } from "primereact/button";
-import { useParams } from "react-router-dom";
+import { Skeleton } from "primereact/skeleton";
 import moment from "moment";
 
-const DynaLoaderDataTable = ({ items, onEditRow, onRowDelete, onRowClick }) => {
+const DynaLoaderDataTable = ({
+  items,
+  onEditRow,
+  onRowDelete,
+  onRowClick,
+  hasServicePermission,
+  hasServiceFieldsPermission,
+  filename,
+}) => {
   const dt = useRef(null);
   const urlParams = useParams();
+  const [permissions, setPermissions] = useState({});
+  const [fieldPermissions, setFieldPermissions] = useState({});
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, []);
 
   const pTemplate0 = (rowData, { rowIndex }) => <p>{rowData.from}</p>;
   const pTemplate1 = (rowData, { rowIndex }) => <p>{rowData.to2}</p>;
@@ -34,64 +62,104 @@ const DynaLoaderDataTable = ({ items, onEditRow, onRowDelete, onRowClick }) => {
     />
   );
 
+  const renderSkeleton = () => {
+    return (
+      <DataTable
+        value={Array.from({ length: 5 })}
+        className="p-datatable-striped"
+      >
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+      </DataTable>
+    );
+  };
+
   return (
-    <DataTable
-      value={items}
-      ref={dt}
-      removableSort
-      onRowClick={onRowClick}
-      scrollable
-      rowHover
-      stripedRows
-      paginator
-      rows={10}
-      rowsPerPageOptions={[10, 50, 250, 500]}
-      size={"small"}
-      paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-      currentPageReportTemplate="{first} to {last} of {totalRecords}"
-      rowClassName="cursor-pointer"
-      alwaysShowPaginator={!urlParams.singleUsersId}
-    >
-      <Column
-        field="from"
-        header="Source"
-        body={pTemplate0}
-        sortable
-        frozen
-        style={{ minWidth: "8rem" }}
-      />
-      <Column
-        field="to2"
-        header="Destination"
-        body={pTemplate1}
-        sortable
-        style={{ minWidth: "8rem" }}
-      />
-      <Column
-        field="name"
-        header="Action"
-        body={pTemplate2}
-        sortable
-        style={{ minWidth: "8rem" }}
-      />
-      <Column
-        field="createdAt"
-        header="Created"
-        body={pTemplate3}
-        sortable
-        style={{ minWidth: "8rem" }}
-      />
-      <Column
-        field="updatedAt"
-        header="Updated"
-        body={pTemplate4}
-        sortable
-        style={{ minWidth: "8rem" }}
-      />
-      <Column header="Check & run" body={editTemplate} />
-      <Column header="Delete" body={deleteTemplate} />
-    </DataTable>
+    <>
+      {isLoadingPermissions ? (
+        renderSkeleton()
+      ) : permissions.read ? (
+        <>
+          <DataTable
+            value={items}
+            ref={dt}
+            removableSort
+            onRowClick={onRowClick}
+            scrollable
+            rowHover
+            stripedRows
+            paginator
+            rows={10}
+            rowsPerPageOptions={[10, 50, 250, 500]}
+            size={"small"}
+            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="{first} to {last} of {totalRecords}"
+            rowClassName="cursor-pointer"
+            alwaysShowPaginator={!urlParams.singleUsersId}
+          >
+            <Column
+              field="from"
+              header="Source"
+              body={pTemplate0}
+              sortable
+              frozen
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="to2"
+              header="Destination"
+              body={pTemplate1}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="name"
+              header="Action"
+              body={pTemplate2}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="createdAt"
+              header="Created"
+              body={pTemplate3}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="updatedAt"
+              header="Updated"
+              body={pTemplate4}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column header="Check & run" body={editTemplate} />
+            <Column header="Delete" body={deleteTemplate} />
+          </DataTable>
+        </>
+      ) : (
+        <div className="p-m-3 p-text-center">
+          <h3>You do not have permission to view this data.</h3>
+        </div>
+      )}
+    </>
   );
 };
 
-export default DynaLoaderDataTable;
+const mapState = (state) => {
+  const { user, isLoggedIn } = state.auth;
+  return { user, isLoggedIn };
+};
+
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
+});
+
+export default connect(mapState, mapDispatch)(DynaLoaderDataTable);

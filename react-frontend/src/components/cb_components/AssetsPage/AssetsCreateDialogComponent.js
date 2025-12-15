@@ -3,23 +3,70 @@ import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 import client from "../../../services/restClient";
 import _ from "lodash";
+import initilization from "../../../utils/init";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { getSchemaValidationErrorsStrings } from "../../../utils";
-
 const DocumentStoragesCreateDialogComponent = (props) => {
   const [_entity, set_entity] = useState({});
-  const [error, setError] = useState("");
+  const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const urlParams = useParams();
 
   useEffect(() => {
-    set_entity(props.entity);
-  }, [props.entity, props.show]);
+    let init = {};
+    if (!_.isEmpty(props?.entity)) {
+      init = initilization({ ...props?.entity, ...init }, [], setError);
+    }
+    set_entity({ ...init });
+  }, [props.show]);
+
+  const validate = () => {
+    let ret = true;
+    const error = {};
+
+    if (_.isEmpty(_entity?.name)) {
+      error["name"] = `Media Name field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.path)) {
+      error["path"] = `Path field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.eTag)) {
+      error["eTag"] = `AWS ETag field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.versionId)) {
+      error["versionId"] = `AWS Version Id field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.url)) {
+      error["url"] = `Url field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.tableId)) {
+      error["tableId"] = `Table Id field is required`;
+      ret = false;
+    }
+
+    if (_.isEmpty(_entity?.tableName)) {
+      error["tableName"] = `Table Name field is required`;
+      ret = false;
+    }
+    if (!ret) setError(error);
+    return ret;
+  };
 
   const onSave = async () => {
+    if (!validate()) return;
     let _data = {
       name: _entity?.name,
       size: _entity?.size,
@@ -31,29 +78,28 @@ const DocumentStoragesCreateDialogComponent = (props) => {
       url: _entity?.url,
       tableId: _entity?.tableId,
       tableName: _entity?.tableName,
+      createdBy: props.user._id,
+      updatedBy: props.user._id,
     };
 
     setLoading(true);
+
     try {
-      const result = await client
-        .service("documentStorages")
-        .patch(_entity._id, _data);
+      const result = await client.service("documentStorages").create(_data);
       props.onHide();
       props.alert({
         type: "success",
-        title: "Edit info",
-        message: "Info documentStorages updated successfully",
+        title: "Create info",
+        message: "Info Media Storages created successfully",
       });
-      props.onEditResult(result);
+      props.onCreateResult(result);
     } catch (error) {
       console.debug("error", error);
-      setError(
-        getSchemaValidationErrorsStrings(error) || "Failed to update info",
-      );
+      setError(getSchemaValidationErrorsStrings(error) || "Failed to create");
       props.alert({
         type: "error",
-        title: "Edit info",
-        message: "Failed to update info",
+        title: "Create",
+        message: "Failed to create in Media Storages",
       });
     }
     setLoading(false);
@@ -83,7 +129,7 @@ const DocumentStoragesCreateDialogComponent = (props) => {
 
   return (
     <Dialog
-      header="Edit Document Storages"
+      header="Create Media Storages"
       visible={props.show}
       closable={false}
       onHide={props.onHide}
@@ -96,11 +142,11 @@ const DocumentStoragesCreateDialogComponent = (props) => {
       <div
         className="grid p-fluid overflow-y-auto"
         style={{ maxWidth: "55vw" }}
-        role="documentStorages-edit-dialog-component"
+        role="documentStorages-create-dialog-component"
       >
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
-            <label htmlFor="name">Document Name:</label>
+            <label htmlFor="name">Media Name:</label>
             <InputText
               id="name"
               className="w-full mb-3 p-inputtext-sm"
@@ -109,6 +155,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["name"]) ? (
+              <p className="m-0" key="error-name">
+                {error["name"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -121,6 +174,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               onChange={(e) => setValByKey("size", e.value)}
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["size"]) ? (
+              <p className="m-0" key="error-size">
+                {error["size"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -133,12 +193,26 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["path"]) ? (
+              <p className="m-0" key="error-path">
+                {error["path"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
             <label htmlFor="lastModifiedDate">Last Modified Date:</label>
             undefined
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["lastModifiedDate"]) ? (
+              <p className="m-0" key="error-lastModifiedDate">
+                {error["lastModifiedDate"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -150,6 +224,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               onChange={(e) => setValByKey("lastModified", e.value)}
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["lastModified"]) ? (
+              <p className="m-0" key="error-lastModified">
+                {error["lastModified"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -162,6 +243,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["eTag"]) ? (
+              <p className="m-0" key="error-eTag">
+                {error["eTag"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -174,6 +262,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["versionId"]) ? (
+              <p className="m-0" key="error-versionId">
+                {error["versionId"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -186,6 +281,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["url"]) ? (
+              <p className="m-0" key="error-url">
+                {error["url"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -198,6 +300,13 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["tableId"]) ? (
+              <p className="m-0" key="error-tableId">
+                {error["tableId"]}
+              </p>
+            ) : null}
+          </small>
         </div>
         <div className="col-12 md:col-6 field mt-5">
           <span className="align-items-center">
@@ -210,8 +319,14 @@ const DocumentStoragesCreateDialogComponent = (props) => {
               required
             />
           </span>
+          <small className="p-error">
+            {!_.isEmpty(error["tableName"]) ? (
+              <p className="m-0" key="error-tableName">
+                {error["tableName"]}
+              </p>
+            ) : null}
+          </small>
         </div>
-        <div className="col-12">&nbsp;</div>
       </div>
     </Dialog>
   );

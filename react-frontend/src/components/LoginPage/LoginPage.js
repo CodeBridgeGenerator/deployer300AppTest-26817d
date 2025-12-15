@@ -147,7 +147,7 @@ const LoginPage = (props) => {
     }
     if (password.length < 6) {
       setPasswordError(
-        "Please enter a valid password. Must be at least 6 characters"
+        "Please enter a valid password. Must be at least 6 characters",
       );
       isValid = false;
     }
@@ -274,7 +274,7 @@ const LoginPage = (props) => {
                   onChange={(e) => setEmail(e.target.value)}
                   className={classNames(
                     emailError ? "p-invalid" : "",
-                    "w-full"
+                    "w-full",
                   )}
                   onKeyDown={onEnter}
                 />
@@ -297,7 +297,7 @@ const LoginPage = (props) => {
                     onChange={(e) => setPassword(e.target.value)}
                     className={classNames(
                       passwordError ? "p-invalid" : "",
-                      "w-full"
+                      "w-full",
                     )}
                     onKeyDown={onEnter}
                   />

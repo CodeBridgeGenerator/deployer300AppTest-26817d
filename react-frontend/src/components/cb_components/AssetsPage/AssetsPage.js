@@ -73,9 +73,9 @@ const AssetsPage = (props) => {
   //       console.debug({ error });
   //       setLoading(false);
   //       props.alert({
-  //         title: "Document Storages",
+  //         title: "Media Storages",
   //         type: "error",
-  //         message: error.message || "Failed get Document Storages",
+  //         message: error.message || "Failed get Media Storages",
   //       });
   //     });
   // }, []);

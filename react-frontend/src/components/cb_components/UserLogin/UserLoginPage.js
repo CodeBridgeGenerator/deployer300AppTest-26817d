@@ -118,9 +118,7 @@ const LoginHistory = (props) => {
           message: error.message || "Failed get Login History",
         });
       });
-  }, [
-    refresh,
-  ]);
+  }, [refresh]);
 
   const onClickSaveFilteredfields = (ff) => {
     console.debug(ff);
@@ -129,11 +127,6 @@ const LoginHistory = (props) => {
   const onClickSaveHiddenfields = (ff) => {
     console.debug(ff);
   };
-
-  
-  
-  
-  
 
   const onRowClick = ({ data }) => {
     navigate(`/loginHistory/${data._id}`);
@@ -165,7 +158,7 @@ const LoginHistory = (props) => {
       icon: "pi pi-question-circle",
       command: () => toggleHelpSidebar(),
     },
-  ]
+  ];
 
   const onMenuSort = (sortOption) => {
     let sortedData;
@@ -275,7 +268,7 @@ const LoginHistory = (props) => {
     get();
     props.hasServicePermission(filename).then(setPermissions);
   }, []);
-  
+
   const get = async () => {
     const tabId = getOrSetTabId();
     const response = await props.get();
@@ -356,10 +349,7 @@ const LoginHistory = (props) => {
       <div className="grid">
         <div className="col-6 flex align-items-center justify-content-start">
           <h4 className="mb-0 ml-2">
-            <span>
-              {" "}
-              
-            </span>
+            <span> </span>
             <strong>Login History </strong>
           </h4>
           {permissions.read ? (
@@ -426,11 +416,10 @@ const LoginHistory = (props) => {
           <UserLoginsDataTable
             items={data}
             fields={fields}
-
             onRowClick={onRowClick}
             searchDialog={searchDialog}
             setSearchDialog={setSearchDialog}
-                        showFilter={showFilter}
+            showFilter={showFilter}
             setShowFilter={setShowFilter}
             showColumns={showColumns}
             setShowColumns={setShowColumns}
@@ -456,7 +445,7 @@ const LoginHistory = (props) => {
         triggerDownload={triggerDownload}
         setTriggerDownload={setTriggerDownload}
       />
-      
+
       <HelpbarService
         isVisible={isHelpSidebarVisible}
         onToggle={toggleHelpSidebar}

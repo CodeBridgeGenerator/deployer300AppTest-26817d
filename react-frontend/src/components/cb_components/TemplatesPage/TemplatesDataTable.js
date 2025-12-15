@@ -1,6 +1,6 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import _ from "lodash";
 import { Button } from "primereact/button";
 import { Image } from "primereact/image";
@@ -18,6 +18,7 @@ import CopyIcon from "../../../assets/media/Clipboard.png";
 import DuplicateIcon from "../../../assets/media/Duplicate.png";
 import DeleteIcon from "../../../assets/media/Trash.png";
 import { Checkbox } from "primereact/checkbox";
+import { Skeleton } from "primereact/skeleton";
 
 const TemplatesDataTable = ({
   items,
@@ -44,6 +45,9 @@ const TemplatesDataTable = ({
   selectedDelete,
   setSelectedDelete,
   onCreateResult,
+  filename,
+  hasServicePermission,
+  hasServiceFieldsPermission,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -51,6 +55,24 @@ const TemplatesDataTable = ({
   const [selectedItems, setSelectedItems] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [data, setData] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [fieldPermissions, setFieldPermissions] = useState({});
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, []);
 
   const header = (
     <div
@@ -152,258 +174,300 @@ const TemplatesDataTable = ({
     setShowDialog(false); // Close the dialog
   };
 
+  const renderSkeleton = () => {
+    return (
+      <DataTable
+        value={Array.from({ length: 5 })}
+        className="p-datatable-striped"
+      >
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+      </DataTable>
+    );
+  };
   return (
     <>
-      <DataTable
-        value={items}
-        ref={dt}
-        removableSort
-        onRowClick={onRowClick}
-        scrollable
-        rowHover
-        stripedRows
-        paginator
-        rows={10}
-        rowsPerPageOptions={[10, 50, 250, 500]}
-        size={"small"}
-        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-        currentPageReportTemplate="{first} to {last} of {totalRecords}"
-        rowClassName="cursor-pointer"
-        alwaysShowPaginator={!urlParams.singleUsersId}
-        selection={selectedItems}
-        onSelectionChange={(e) => setSelectedItems(e.value)}
-        onCreateResult={onCreateResult}
-        globalFilter={globalFilter}
-        header={header}
-        user={user}
-      >
-        <Column
-          selectionMode="multiple"
-          headerStyle={{ width: "3rem" }}
-          body={checkboxTemplate}
-        />
-        <Column
-          field="name"
-          header="Name"
-          body={pTemplate0}
-          filter={selectedFilterFields.includes("name")}
-          hidden={selectedHideFields?.includes("name")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="subject"
-          header="Subject"
-          body={inputTextareaTemplate1}
-          filter={selectedFilterFields.includes("subject")}
-          hidden={selectedHideFields?.includes("subject")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="body"
-          header="Body"
-          body={editorTemplate2}
-          filter={selectedFilterFields.includes("body")}
-          hidden={selectedHideFields?.includes("body")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="variables"
-          header="Variables"
-          body={inputTextareaTemplate3}
-          filter={selectedFilterFields.includes("variables")}
-          hidden={selectedHideFields?.includes("variables")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="image"
-          header="Image"
-          body={imageTemplate4}
-          filter={selectedFilterFields.includes("image")}
-          hidden={selectedHideFields?.includes("image")}
-          sortable
-          style={{ minWidth: "8rem" }}
-        />
-        <Column header="Edit" body={editTemplate} />
-        <Column header="Delete" body={deleteTemplate} />
-      </DataTable>
-
-      {selectedItems.length > 0 ? (
-        <div
-          className="card center"
-          style={{
-            width: "51rem",
-            margin: "20px auto 0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px",
-            fontSize: "14px",
-            fontFamily: "Arial, sans-serif",
-            color: "#2A4454",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              border: "1px solid #2A4454",
-              padding: "5px",
-              borderRadius: "5px",
-            }}
+      {isLoadingPermissions ? (
+        renderSkeleton()
+      ) : permissions.read ? (
+        <>
+          <DataTable
+            value={items}
+            ref={dt}
+            removableSort
+            onRowClick={onRowClick}
+            scrollable
+            rowHover
+            stripedRows
+            paginator
+            rows={10}
+            rowsPerPageOptions={[10, 50, 250, 500]}
+            size={"small"}
+            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="{first} to {last} of {totalRecords}"
+            rowClassName="cursor-pointer"
+            alwaysShowPaginator={!urlParams.singleUsersId}
+            selection={selectedItems}
+            onSelectionChange={(e) => setSelectedItems(e.value)}
+            onCreateResult={onCreateResult}
+            globalFilter={globalFilter}
+            header={header}
+            user={user}
           >
-            {selectedItems.length} selected
-            <span
-              className="pi pi-times"
-              style={{
-                cursor: "pointer",
-                marginLeft: "10px",
-                color: "#2A4454",
-              }}
-              onClick={() => {
-                deselectAllRows();
-              }}
+            <Column
+              selectionMode="multiple"
+              headerStyle={{ width: "3rem" }}
+              body={checkboxTemplate}
             />
-          </div>
+            <Column
+              field="name"
+              header="Name"
+              body={pTemplate0}
+              filter={selectedFilterFields.includes("name")}
+              hidden={selectedHideFields?.includes("name")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="subject"
+              header="Subject"
+              body={inputTextareaTemplate1}
+              filter={selectedFilterFields.includes("subject")}
+              hidden={selectedHideFields?.includes("subject")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="body"
+              header="Body"
+              body={editorTemplate2}
+              filter={selectedFilterFields.includes("body")}
+              hidden={selectedHideFields?.includes("body")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="variables"
+              header="Variables"
+              body={inputTextareaTemplate3}
+              filter={selectedFilterFields.includes("variables")}
+              hidden={selectedHideFields?.includes("variables")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column
+              field="image"
+              header="Image"
+              body={imageTemplate4}
+              filter={selectedFilterFields.includes("image")}
+              hidden={selectedHideFields?.includes("image")}
+              sortable
+              style={{ minWidth: "8rem" }}
+            />
+            <Column header="Edit" body={editTemplate} />
+            <Column header="Delete" body={deleteTemplate} />
+          </DataTable>
 
-          {/* New buttons section */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Copy button */}
-            <Button
-              label="Copy"
-              labelposition="right"
-              icon={
-                <img
-                  src={CopyIcon}
-                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
-                />
-              }
-              // tooltip="Copy"
-              // onClick={handleCopy}
-              className="p-button-rounded p-button-text"
+          {selectedItems.length > 0 ? (
+            <div
+              className="card center"
               style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
+                width: "51rem",
+                margin: "20px auto 0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px",
                 fontSize: "14px",
                 fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
-
-            {/* Duplicate button */}
-            <Button
-              label="Duplicate"
-              labelposition="right"
-              icon={
-                <img
-                  src={DuplicateIcon}
-                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
-                />
-              }
-              // tooltip="Duplicate"
-              // onClick={handleDuplicate}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
                 color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
               }}
-            />
-
-            {/* Export button */}
-            <Button
-              label="Export"
-              labelposition="right"
-              icon={
-                <img
-                  src={ExportIcon}
-                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #2A4454",
+                  padding: "5px",
+                  borderRadius: "5px",
+                }}
+              >
+                {selectedItems.length} selected
+                <span
+                  className="pi pi-times"
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    color: "#2A4454",
+                  }}
+                  onClick={() => {
+                    deselectAllRows();
+                  }}
                 />
-              }
-              // tooltip="Export"
-              // onClick={handleExport}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
+              </div>
 
-            {/* Message button */}
-            <Button
-              label="Message"
-              labelposition="right"
-              icon={
-                <img
-                  src={InviteIcon}
-                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
+              {/* New buttons section */}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {/* Copy button */}
+                <Button
+                  label="Copy"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={CopyIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  // tooltip="Copy"
+                  // onClick={handleCopy}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
                 />
-              }
-              onClick={handleMessage}
-              className="p-button-rounded p-button-text"
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                marginRight: "8px",
-                gap: "4px",
-              }}
-            />
 
-            {/* InboxCreateDialogComponent */}
-            <InboxCreateDialogComponent
-              show={showDialog}
-              onHide={handleHideDialog}
-              serviceInbox="companies"
-              onCreateResult={onCreateResult}
-              // selectedItemsId={selectedItems.map(item => item._id)}
-              selectedItemsId={selectedItems}
-            />
-
-            {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
-            <Button
-              label="Delete"
-              labelposition="right"
-              icon={
-                <img
-                  src={DeleteIcon}
-                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
+                {/* Duplicate button */}
+                <Button
+                  label="Duplicate"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={DuplicateIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  // tooltip="Duplicate"
+                  // onClick={handleDuplicate}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
                 />
-              }
-              onClick={handleDelete}
-              style={{
-                backgroundColor: "white",
-                color: "#2A4454",
-                border: "1px solid transparent",
-                transition: "border-color 0.3s",
-                fontSize: "14px",
-                fontFamily: "Arial, sans-serif",
-                gap: "4px",
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
+
+                {/* Export button */}
+                <Button
+                  label="Export"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={ExportIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  // tooltip="Export"
+                  // onClick={handleExport}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* Message button */}
+                <Button
+                  label="Message"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={InviteIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  onClick={handleMessage}
+                  className="p-button-rounded p-button-text"
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    marginRight: "8px",
+                    gap: "4px",
+                  }}
+                />
+
+                {/* InboxCreateDialogComponent */}
+                <InboxCreateDialogComponent
+                  show={showDialog}
+                  onHide={handleHideDialog}
+                  serviceInbox="companies"
+                  onCreateResult={onCreateResult}
+                  // selectedItemsId={selectedItems.map(item => item._id)}
+                  selectedItemsId={selectedItems}
+                />
+
+                {/* <div style={{ display: 'flex', alignItems: 'center' }}> */}
+                <Button
+                  label="Delete"
+                  labelposition="right"
+                  icon={
+                    <img
+                      src={DeleteIcon}
+                      style={{
+                        marginRight: "4px",
+                        width: "1em",
+                        height: "1em",
+                      }}
+                    />
+                  }
+                  onClick={handleDelete}
+                  style={{
+                    backgroundColor: "white",
+                    color: "#2A4454",
+                    border: "1px solid transparent",
+                    transition: "border-color 0.3s",
+                    fontSize: "14px",
+                    fontFamily: "Arial, sans-serif",
+                    gap: "4px",
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <div>You do not have permission to view this data.</div>
+      )}
 
       <Dialog
         header="Upload Templates Data"

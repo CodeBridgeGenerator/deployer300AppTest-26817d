@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import client from "../../../services/restClient";
 import _ from "lodash";
-import DocumentStoragesDatatable from "./DocumentStoragesDataTable";
+import DocumentStoragesDatatable from "./MediaDataTable";
 import AreYouSureDialog from "../../common/AreYouSureDialog";
 
 const MediaPage = (props) => {
@@ -12,8 +12,11 @@ const MediaPage = (props) => {
   const [loading, setLoading] = useState(false);
   const [selectedEntityIndex, setSelectedEntityIndex] = useState(null);
   const [showAreYouSureDialog, setShowAreYouSureDialog] = useState(false);
-
   const allowedExtensions = ["mp4", "mp3", "mov"];
+  const [selectedDelete, setSelectedDelete] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [selectedUser, setSelectedUser] = useState();
+  const filename = "media";
 
   useEffect(() => {
     //on mount
@@ -39,6 +42,7 @@ const MediaPage = (props) => {
       })
       .then((res) => {
         let results = res.data;
+        props.hasServicePermission(filename).then(setPermissions);
         const filteredResults = results.filter((item) => {
           if (item.url) {
             const url = item.url.toLowerCase();
@@ -55,9 +59,9 @@ const MediaPage = (props) => {
         console.debug({ error });
         setLoading(false);
         props.alert({
-          title: "Document Storages",
+          title: "Media Storages",
           type: "error",
-          message: error.message || "Failed get Document Storages",
+          message: error.message || "Failed get Media Storages",
         });
       });
   }, []);
@@ -108,6 +112,7 @@ const MediaPage = (props) => {
             onRowDelete={onRowDelete}
             onRowClick={onRowClick}
             loading={loading}
+            filename={filename}
           />
         </div>
       </div>

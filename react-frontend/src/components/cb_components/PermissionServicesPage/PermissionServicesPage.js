@@ -264,12 +264,12 @@ const PermissionServicesPage = (props) => {
     //     icon: "pi pi-share-alt",
     //     command: () => setSearchDialog(true)
     // },
-    {
+    permissions.import && {
       label: "Import",
       icon: "pi pi-upload",
       command: () => setShowUpload(true),
     },
-    {
+    permissions.export && {
       label: "Export",
       icon: "pi pi-download",
       command: () => {
@@ -288,8 +288,7 @@ const PermissionServicesPage = (props) => {
       command: () => toggleHelpSidebar(),
     },
     { separator: true },
-
-    {
+    process.env.REACT_APP_ENV == "development" && {
       label: "Testing",
       icon: "pi pi-check-circle",
       items: [
@@ -310,7 +309,7 @@ const PermissionServicesPage = (props) => {
         },
       ],
     },
-    {
+    permissions.seeder && {
       label: "Data seeder",
       icon: "pi pi-database",
       command: (e) => {
@@ -475,34 +474,58 @@ const PermissionServicesPage = (props) => {
             </span>
             <strong>Permissions </strong>
           </h4>
-          <SplitButton
-            model={menuItems.filter(
-              (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
-            )}
-            dropdownIcon="pi pi-ellipsis-h"
-            buttonClassName="hidden"
-            menuButtonClassName="ml-1 p-button-text"
-          />
+          {permissions?.read && (
+            <SplitButton
+              model={menuItems.filter(
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
+              )}
+              dropdownIcon="pi pi-ellipsis-h"
+              buttonClassName="hidden"
+              menuButtonClassName="ml-1 p-button-text"
+            />
+          )}
         </div>
         <div className="col-6 flex justify-content-end">
           <>
-            <Button
-              label="add"
-              style={{ height: "30px", marginRight: "10px" }}
-              rounded
-              loading={loading}
-              icon="pi pi-plus"
-              onClick={() => setShowCreateDialog(true)}
-              role="permissionServices-add-button"
-            />
-            {/* <SplitButton
-              model={menuItems.filter(
+            <SplitButton
+              model={filterMenuItems.filter(
                 (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
-              dropdownIcon="pi pi-ellipsis-v"
+              dropdownIcon={
+                <img
+                  src={FilterIcon}
+                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
+                />
+              }
               buttonClassName="hidden"
               menuButtonClassName="ml-1 p-button-text"
-            ></SplitButton> */}
+              // menuStyle={{ width: "250px" }}
+            ></SplitButton>
+            <SplitButton
+              model={sortMenuItems.filter(
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
+              )}
+              dropdownIcon={
+                <img
+                  src={SortIcon}
+                  style={{ marginRight: "4px", width: "1em", height: "1em" }}
+                />
+              }
+              buttonClassName="hidden"
+              menuButtonClassName="ml-1 p-button-text"
+              menuStyle={{ width: "200px" }}
+            ></SplitButton>
+            {permissions?.create && (
+              <Button
+                label="add"
+                style={{ height: "30px", marginRight: "10px" }}
+                rounded
+                loading={loading}
+                icon="pi pi-plus"
+                onClick={() => setShowCreateDialog(true)}
+                role="permissionServices-add-button"
+              />
+            )}
           </>
         </div>
       </div>

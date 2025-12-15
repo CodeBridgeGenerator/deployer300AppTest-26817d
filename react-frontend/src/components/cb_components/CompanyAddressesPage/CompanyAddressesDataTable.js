@@ -187,8 +187,6 @@ const CompanyAddressesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      
-
       return (
         <div>
           <span>Page</span>

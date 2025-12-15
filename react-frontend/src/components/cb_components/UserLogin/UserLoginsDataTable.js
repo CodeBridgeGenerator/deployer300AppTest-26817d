@@ -28,7 +28,7 @@ import { Checkbox } from "primereact/checkbox";
 const PositionsDataTable = ({
   items,
   fields,
-   onRowClick,
+  onRowClick,
   searchDialog,
   setSearchDialog,
   showUpload,
@@ -47,7 +47,7 @@ const PositionsDataTable = ({
   user,
   onCreateResult,
   setRefresh,
-  
+
   setPaginatorRecordsNo,
   paginatorRecordsNo,
   hasServicePermission,
@@ -112,7 +112,7 @@ const PositionsDataTable = ({
           _selectedItems.push(rowData);
         } else {
           _selectedItems = _selectedItems.filter(
-            (item) => item._id !== rowData._id
+            (item) => item._id !== rowData._id,
           );
         }
         setSelectedItems(_selectedItems);
@@ -204,7 +204,7 @@ const PositionsDataTable = ({
 
     try {
       const dataToCopy = selectedItems.map((item) =>
-        _.omit(item, ["_id", "createdAt", "updatedAt"])
+        _.omit(item, ["_id", "createdAt", "updatedAt"]),
       );
       await navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
       toast.current.show({

@@ -185,8 +185,6 @@ const CompaniesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      
-
       return (
         <div>
           <span>Page</span>

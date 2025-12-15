@@ -1,6 +1,6 @@
+import React, { useState, useRef, useEffect } from "react";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useState, useRef, useEffect } from "react";
 import { connect } from "react-redux";
 import _ from "lodash";
 import { Button } from "primereact/button";
@@ -98,45 +98,19 @@ const ProfilesDataTable = ({
   const dropdownTemplate1 = (rowData, { rowIndex }) => (
     <p>{rowData.userId?.name}</p>
   );
-  const imageTemplate2 = (rowData, { rowIndex }) => (
-    <Image src={rowData.image} alt="Image" height="60px" />
-  );
-  const inputTextareaTemplate3 = (rowData, { rowIndex }) => (
-    <p>{rowData.bio}</p>
-  );
-  const dropdownTemplate4 = (rowData, { rowIndex }) => (
-    <p>{rowData.department?.name}</p>
-  );
-  const tickTemplate5 = (rowData, { rowIndex }) => (
-    <i className={`pi ${rowData.hod ? "pi-check" : "pi-times"}`}></i>
-  );
-  const dropdownTemplate6 = (rowData, { rowIndex }) => (
-    <p>{rowData.section?.name}</p>
-  );
-  const tickTemplate7 = (rowData, { rowIndex }) => (
-    <i className={`pi ${rowData.hos ? "pi-check" : "pi-times"}`}></i>
-  );
+  const pTemplate2 = (rowData, { rowIndex }) => <p>{rowData.userId?.email}</p>;
+
   const dropdownTemplate8 = (rowData, { rowIndex }) => (
     <p>{rowData.position?.name}</p>
   );
-  const dropdownTemplate9 = (rowData, { rowIndex }) => (
-    <p>{rowData.manager?.name}</p>
-  );
+
   const dropdownTemplate10 = (rowData, { rowIndex }) => (
     <p>{rowData.company?.name}</p>
   );
   const dropdownTemplate11 = (rowData, { rowIndex }) => (
     <p>{rowData.branch?.name}</p>
   );
-  const chipTemplate12 = (rowData, { rowIndex }) => (
-    <Chip label={rowData.skills} />
-  );
-  const dropdownTemplate13 = (rowData, { rowIndex }) => (
-    <p>{rowData.address?.Street1}</p>
-  );
-  const dropdownTemplate14 = (rowData, { rowIndex }) => (
-    <p>{rowData.phone?.number}</p>
-  );
+
   const editTemplate = (rowData, { rowIndex }) => (
     <Button
       onClick={() => onEditRow(rowData, rowIndex)}
@@ -216,7 +190,7 @@ const ProfilesDataTable = ({
       );
     },
     JumpToPageInput: (options) => {
-      // 
+      //
 
       return (
         <div>
@@ -424,46 +398,14 @@ const ProfilesDataTable = ({
               style={{ minWidth: "8rem" }}
             />
             <Column
-              field="bio"
-              header="Bio"
-              body={inputTextareaTemplate3}
-              filter={selectedFilterFields.includes("bio")}
-              hidden={selectedHideFields?.includes("bio")}
-              sortable
+              field="email"
+              header="email"
+              body={pTemplate2}
+              filter={selectedFilterFields.includes("email")}
+              hidden={selectedHideFields?.includes("email")}
               style={{ minWidth: "8rem" }}
             />
-            {/* <Column
-          field="department"
-          header="Department"
-          body={dropdownTemplate4}
-          filter={selectedFilterFields.includes("department")}
-          hidden={selectedHideFields?.includes("department")}
-          style={{ minWidth: "8rem" }}
-        /> */}
-            {/* <Column
-          field="hod"
-          header="Head of Department"
-          body={tickTemplate5}
-          filter={selectedFilterFields.includes("hod")}
-          hidden={selectedHideFields?.includes("hod")}
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="section"
-          header="Section"
-          body={dropdownTemplate6}
-          filter={selectedFilterFields.includes("section")}
-          hidden={selectedHideFields?.includes("section")}
-          style={{ minWidth: "8rem" }}
-        />
-        <Column
-          field="hos"
-          header="Head of Section"
-          body={tickTemplate7}
-          filter={selectedFilterFields.includes("hos")}
-          hidden={selectedHideFields?.includes("hos")}
-          style={{ minWidth: "8rem" }}
-        /> */}
+
             <Column
               field="position"
               header="Position"
@@ -472,14 +414,7 @@ const ProfilesDataTable = ({
               hidden={selectedHideFields?.includes("position")}
               style={{ minWidth: "8rem" }}
             />
-            {/* <Column
-          field="manager"
-          header="Manager"
-          body={dropdownTemplate9}
-          filter={selectedFilterFields.includes("manager")}
-          hidden={selectedHideFields?.includes("manager")}
-          style={{ minWidth: "8rem" }}
-        /> */}
+
             <Column
               field="company"
               header="Company"
@@ -494,31 +429,6 @@ const ProfilesDataTable = ({
               body={dropdownTemplate11}
               filter={selectedFilterFields.includes("branch")}
               hidden={selectedHideFields?.includes("branch")}
-              style={{ minWidth: "8rem" }}
-            />
-            <Column
-              field="skills"
-              header="Skills"
-              body={chipTemplate12}
-              filter={selectedFilterFields.includes("skills")}
-              hidden={selectedHideFields?.includes("skills")}
-              sortable
-              style={{ minWidth: "8rem" }}
-            />
-            <Column
-              field="address"
-              header="Address"
-              body={dropdownTemplate13}
-              filter={selectedFilterFields.includes("address")}
-              hidden={selectedHideFields?.includes("address")}
-              style={{ minWidth: "8rem" }}
-            />
-            <Column
-              field="phone"
-              header="Phone"
-              body={dropdownTemplate14}
-              filter={selectedFilterFields.includes("phone")}
-              hidden={selectedHideFields?.includes("phone")}
               style={{ minWidth: "8rem" }}
             />
             {permissions.update ? (

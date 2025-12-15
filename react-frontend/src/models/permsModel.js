@@ -37,7 +37,7 @@ export const perms = {
       //     console.log(err);
       //     return { ...err };
       //   });
-      return
+      return;
     },
     ////////////////////////////////////
     //// GET ALL PERMISSION SERVICES ///
@@ -60,7 +60,7 @@ export const perms = {
         const response = await dispatch.cache.get();
         const profileId = response.results.selectedUser;
         const profile = await client.service("profiles").get(profileId);
-        
+
         const adminProfiles = [
           "66e678d947480b243fc573fd",
           "67435a2c6521f76d8ac46f33",
@@ -82,21 +82,28 @@ export const perms = {
         const permissionServiceData = _.filter(this.permServices, {
           service: service,
         });
-        if (Array.isArray(permissionServiceData) && permissionServiceData.length > 0) {
+        if (
+          Array.isArray(permissionServiceData) &&
+          permissionServiceData.length > 0
+        ) {
           permissionService = permissionServiceData[0];
         }
-        
+
         let userHasProfilePermission = false,
           userHasPositionPermission = false,
           userHasRolePermissions = false;
-          
+
         if (
           adminProfiles.includes(profile.position) ||
           adminProfiles.includes(profile.role)
         ) {
-          const results = { read : true, ...permissionService }
-           return results;
-        } else if(Array.isArray(permissionService) && permissionService.length > 0) {
+          const results = { read: true, ...permissionService };
+          return results;
+        } else if (
+          Array.isArray(permissionService) &&
+          permissionService.length > 0
+        ) {
+          console.log("Checking permissions for profile:", profile);
           userHasProfilePermission = permissionService.some(
             (perm) => perm.profile === profile._id
           );
@@ -106,9 +113,25 @@ export const perms = {
           userHasRolePermissions = permissionService.some(
             (perm) => perm.roleId === profile.role
           );
+        } else {
+          console.log(
+            "No specific permissions found, defaulting to full access."
+          );
+          userHasProfilePermission = false;
+          userHasPositionPermission = false;
+          userHasRolePermissions = false;
+          permissionService = {
+            import: false,
+            export: false,
+            create: false,
+            read: false,
+            update: false,
+            delete: false,
+            seeder: false,
+          };
         }
 
-        return {
+        const results = {
           read: [
             userHasProfilePermission,
             userHasPositionPermission,
@@ -116,6 +139,8 @@ export const perms = {
           ].some((v) => v === true),
           ...permissionService,
         };
+        console.log("Permission Results: ", results);
+        return results;
       } catch (err) {
         console.log(err);
         return { ...err };

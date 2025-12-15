@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { useState, useRef, useEffect } from "react";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { connect } from "react-redux";
+import { Skeleton } from "primereact/skeleton";
 import _ from "lodash";
 import { Button } from "primereact/button";
-import { Skeleton } from "primereact/skeleton";
+import { useParams } from "react-router-dom";
 
-const DocumentStoragesDataTable = ({
+const MediaDataTable = ({
   items,
   onRowDelete,
   onRowClick,
@@ -172,7 +172,7 @@ const DocumentStoragesDataTable = ({
           </DataTable>
         </>
       ) : (
-        <p>You do not have permission to view Document Storages.</p>
+        <p>You do not have permission to view this data.</p>
       )}
     </>
   );
@@ -191,4 +191,4 @@ const mapDispatch = (dispatch) => ({
     dispatch.perms.hasServiceFieldsPermission(service),
 });
 
-export default connect(mapState, mapDispatch)(DocumentStoragesDataTable);
+export default connect(mapState, mapDispatch)(MediaDataTable);

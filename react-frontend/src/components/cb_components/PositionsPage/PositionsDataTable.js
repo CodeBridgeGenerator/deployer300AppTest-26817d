@@ -226,7 +226,7 @@ const PositionsDataTable = ({
   useEffect(() => {
     const fetchPermissions = async () => {
       setIsLoadingPermissions(true);
-      const servicePermission = await hasServicePermission(filename); 
+      const servicePermission = await hasServicePermission(filename);
       const fieldPermissions = await hasServiceFieldsPermission(filename);
       setPermissions(servicePermission);
       setFieldPermissions(fieldPermissions);
