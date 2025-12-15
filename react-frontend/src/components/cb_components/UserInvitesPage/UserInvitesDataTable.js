@@ -49,6 +49,9 @@ const UserInvitesDataTable = ({
   selectedUser,
   setPaginatorRecordsNo,
   paginatorRecordsNo,
+  hasServicePermission,
+  hasServiceFieldsPermission,
+  filename,
 }) => {
   console.log("Items in DataTable:", items);
   const dt = useRef(null);
@@ -188,7 +191,7 @@ const UserInvitesDataTable = ({
     <p>{moment(rowData.updatedAt).fromNow()}</p>
   );
   const dropdownTemplate8 = (rowData, { rowIndex }) => (
-    <p>{rowData.positions?.name}</p>
+    <p>{rowData.position?.name}</p>
   );
   const dropdownTemplate10 = (rowData, { rowIndex }) => (
     <p>{rowData.company?.name}</p>
@@ -750,7 +753,11 @@ const mapState = (state) => {
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
-  get: () => dispatch.cache.get(),
+  get: () => dispatch.cache.get(),  
+hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
   set: (data) => dispatch.cache.set(data),
 });
 

@@ -140,8 +140,6 @@ const LoginPage = (props) => {
     }
   };
 
-
-
   const validate = () => {
     let isValid = true;
     if (isEmail && !emailRegex.test(email)) {

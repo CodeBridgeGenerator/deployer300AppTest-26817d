@@ -352,7 +352,7 @@ const AppTopbar = (props) => {
 
     const selectedProfile = profiles.find((profile) => profile?._id === userId);
     const selectedRole = selectedProfile?.position?.roleId || "Unknown Role";
-console.debug("Selected user profile:", selectedProfile);
+    console.debug("Selected user profile:", selectedProfile);
     try {
       await updateCache(userId, selectedRole);
       props.setProfile(selectedProfile);

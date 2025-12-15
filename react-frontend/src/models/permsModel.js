@@ -55,6 +55,7 @@ export const perms = {
       //     console.log(err);
       //     return { ...err };
       //   });
+      return
     },
     ////////////////////////////////////
     //// GET ALL PERMISSION SERVICES ///

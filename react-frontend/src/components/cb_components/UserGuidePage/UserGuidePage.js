@@ -44,8 +44,8 @@ const UserGuidePage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);
-
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});
   const helpSidebarRef = useRef(null);
 
   useEffect(() => {
@@ -75,6 +75,7 @@ const UserGuidePage = (props) => {
       setSelectedHideFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -529,6 +530,8 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
 });

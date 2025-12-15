@@ -45,9 +45,8 @@ const UsersPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
-  const [permissions, setPermissions] = useState({});
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});  const [selectedUser, setSelectedUser] = useState();
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
   const [triggerDownload, setTriggerDownload] = useState(false);
@@ -93,6 +92,7 @@ const UsersPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -453,55 +453,6 @@ const UsersPage = (props) => {
     updateCache();
   }, [paginatorRecordsNo, selectedUser]);
 
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const companyPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "users" },
-            });
-
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = companyPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-            console.log("userPermissions", userPermissions);
-          } else {
-            console.log("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
-    };
-
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
-
   return (
     <div className="mt-5">
       <div className="grid">
@@ -603,6 +554,7 @@ const UsersPage = (props) => {
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
             paginatorRecordsNo={paginatorRecordsNo}
+            filename={filename}
           />
         </div>
       </div>
@@ -665,6 +617,8 @@ const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   setOneUser: (id) => dispatch.user.setOneUser(id),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
   get: () => dispatch.cache.get(),

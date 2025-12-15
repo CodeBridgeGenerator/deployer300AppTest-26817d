@@ -46,6 +46,7 @@ const DynaLoaderPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);

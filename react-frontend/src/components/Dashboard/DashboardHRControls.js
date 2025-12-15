@@ -30,7 +30,7 @@ const DashboardHRControls = (props) => {
       const { profiles = [], selectedUser } = response.results || {};
 
       const selectedProfile = profiles.find(
-        (profile) => profile.profileId === selectedUser
+        (profile) => profile.profileId === selectedUser,
       );
 
       if (selectedProfile?.preferences) {
@@ -41,7 +41,7 @@ const DashboardHRControls = (props) => {
           .filter(
             (item, index, self) =>
               self.findIndex((i) => i.url === item.url) === index &&
-              item.mainMenu === "people"
+              item.mainMenu === "people",
           )
           .slice(0, 3)
           .map((item) => ({
@@ -114,7 +114,7 @@ const DashboardHRControls = (props) => {
       });
 
       const sorted = count.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
 
       // Step 2: Filter unique users by userId._id
@@ -198,7 +198,7 @@ const DashboardHRControls = (props) => {
       });
 
       const sorted = count.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
 
       // Step 2: Filter unique users by userId._id
@@ -303,7 +303,7 @@ const DashboardHRControls = (props) => {
                   <span className="text-sm text-600">
                     Since {moment(showDates?.from).fromNow()}
                   </span>
-                
+
                   <span className=" text-sm text-600">All Time </span>
                 </div>
               </>

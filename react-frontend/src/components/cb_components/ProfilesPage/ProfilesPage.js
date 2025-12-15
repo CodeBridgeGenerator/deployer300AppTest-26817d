@@ -46,9 +46,9 @@ const ProfilesPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
-  const [permissions, setPermissions] = useState({});
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});  const [selectedUser, setSelectedUser] = useState();
+
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
 
@@ -101,6 +101,7 @@ const ProfilesPage = (props) => {
       setSelectedHideFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -273,8 +274,8 @@ const ProfilesPage = (props) => {
           setLoading(false);
           props.hide();
           console.debug({ error });
-        })
-      )
+        }),
+      ),
     );
     props.hide();
     setLoading(false);
@@ -444,8 +445,6 @@ const ProfilesPage = (props) => {
 
   useEffect(() => {
     get();
-    console.log(props.hasServicePermission("profiles"));
-    setPermissions(props.hasServicePermission("profiles"));
   }, []);
 
   const get = async () => {
@@ -459,14 +458,14 @@ const ProfilesPage = (props) => {
 
     if (currentCache && selectedUser) {
       const selectedUserProfile = currentCache.profiles.find(
-        (profile) => profile.profileId === selectedUser
+        (profile) => profile.profileId === selectedUser,
       );
 
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
           "preferences.settings.profiles.paginatorRecordsNo",
-          10
+          10,
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
         // console.debug("PaginatorRecordsNo from cache:", paginatorRecordsNo);
@@ -483,7 +482,7 @@ const ProfilesPage = (props) => {
       const paginatorRecordsNo = _.get(
         profileResponse,
         "preferences.settings.profiles.paginatorRecordsNo",
-        10
+        10,
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
       // console.debug("PaginatorRecordsNo from service:", paginatorRecordsNo);
@@ -502,14 +501,14 @@ const ProfilesPage = (props) => {
 
       if (currentCache && selectedUser) {
         const selectedUserProfileIndex = currentCache.profiles.findIndex(
-          (profile) => profile.profileId === selectedUser
+          (profile) => profile.profileId === selectedUser,
         );
 
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
             "preferences.settings.profiles.paginatorRecordsNo",
-            paginatorRecordsNo
+            paginatorRecordsNo,
           );
 
           props.set(currentCache);
@@ -537,7 +536,7 @@ const ProfilesPage = (props) => {
           {permissions.read ? (
             <SplitButton
               model={menuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
               )}
               dropdownIcon="pi pi-ellipsis-h"
               buttonClassName="hidden"
@@ -553,7 +552,7 @@ const ProfilesPage = (props) => {
             />{" "}
             <SplitButton
               model={filterMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img
@@ -567,7 +566,7 @@ const ProfilesPage = (props) => {
             ></SplitButton>
             <SplitButton
               model={sortMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
               )}
               dropdownIcon={
                 <img
@@ -624,6 +623,7 @@ const ProfilesPage = (props) => {
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
             paginatorRecordsNo={paginatorRecordsNo}
+            filename={filename}
           />
         </div>
       </div>

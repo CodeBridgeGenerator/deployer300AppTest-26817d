@@ -58,6 +58,7 @@ const ProfilesDataTable = ({
   paginatorRecordsNo,
   hasServicePermission,
   hasServiceFieldsPermission,
+  filename,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -161,7 +162,7 @@ const ProfilesDataTable = ({
           _selectedItems.push(rowData);
         } else {
           _selectedItems = _selectedItems.filter(
-            (item) => item._id !== rowData._id
+            (item) => item._id !== rowData._id,
           );
         }
         setSelectedItems(_selectedItems);
@@ -240,11 +241,11 @@ const ProfilesDataTable = ({
   const confirmDelete = async () => {
     try {
       const promises = selectedItems.map((item) =>
-        client.service("profiles").remove(item._id)
+        client.service("profiles").remove(item._id),
       );
       await Promise.all(promises);
       const updatedData = data.filter(
-        (item) => !selectedItems.find((selected) => selected._id === item._id)
+        (item) => !selectedItems.find((selected) => selected._id === item._id),
       );
       setData(updatedData);
       setSelectedDelete(selectedItems.map((item) => item._id));
@@ -258,10 +259,10 @@ const ProfilesDataTable = ({
   };
 
   const fetchServicePermissions = async () => {
-    //hasPermission
-    const servicePermissions = await hasServicePermission("profiles");
-    const fieldPermissions = await hasServiceFieldsPermission("profiles");
-    setIsLoadingPermissions(servicePermissions?.read);
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
     setPermissions(servicePermissions);
     setFieldPermissions(fieldPermissions);
     console.log("Service Permissions:", servicePermissions);
@@ -285,7 +286,7 @@ const ProfilesDataTable = ({
 
     try {
       const dataToCopy = selectedItems.map((item) =>
-        _.omit(item, ["_id", "createdAt", "updatedAt"])
+        _.omit(item, ["_id", "createdAt", "updatedAt"]),
       );
       await navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
       toast.current.show({

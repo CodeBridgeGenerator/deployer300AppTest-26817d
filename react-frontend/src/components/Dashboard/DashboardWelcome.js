@@ -30,7 +30,7 @@ const DashboardWelcome = (props) => {
   useEffect(() => {
     props.getPermissionFields();
     props.getPermissionServices();
-  },[])
+  }, []);
 
   const toggleHelpSidebar = () => {
     setHelpSidebarVisible(!isHelpSidebarVisible);
@@ -133,6 +133,5 @@ const mapDispatch = (dispatch) => ({
   getPermissionFields: () => dispatch.perms.getPermissionFields(),
   getPermissionServices: () => dispatch.perms.getPermissionServices(),
 });
-
 
 export default connect(mapState, mapDispatch)(DashboardWelcome);

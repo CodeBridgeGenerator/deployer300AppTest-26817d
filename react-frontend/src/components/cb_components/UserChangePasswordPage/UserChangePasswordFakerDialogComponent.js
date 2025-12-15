@@ -111,6 +111,10 @@ const mapState = (state) => {
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
 });
 
 export default connect(

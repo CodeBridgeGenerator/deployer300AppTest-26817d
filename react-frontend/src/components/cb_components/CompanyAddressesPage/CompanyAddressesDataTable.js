@@ -53,6 +53,9 @@ const CompanyAddressesDataTable = ({
   selectedUser,
   setPaginatorRecordsNo,
   paginatorRecordsNo,
+  hasServicePermission,
+  hasServiceFieldsPermission,
+  filename,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -227,57 +230,6 @@ const CompanyAddressesDataTable = ({
   };
 
   useEffect(() => {
-    const fetchPermissions = async () => {
-      setIsLoadingPermissions(true);
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const companyAddressesPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "companyAddresses" },
-            });
-
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = companyAddressesPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = companyAddressesPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = companyAddressesPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-          } else {
-            console.log("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      } finally {
-        setIsLoadingPermissions(false);
-      }
-    };
-
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
-
-  useEffect(() => {
     const fetchFieldPermissions = async () => {
       try {
         const userPermissions = await client.service("permissionFields").find();
@@ -295,10 +247,25 @@ const CompanyAddressesDataTable = ({
       }
     };
 
-    fetchFieldPermissions();
+      fetchFieldPermissions();
     if (selectedUser) {
       fetchFieldPermissions();
     }
+  }, [selectedUser]);
+
+const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
   }, [selectedUser]);
 
   const handleMessage = () => {
@@ -877,16 +844,18 @@ const CompanyAddressesDataTable = ({
   );
 };
 
-
 const mapState = (state) => {
   const { user, isLoggedIn } = state.auth;
   const { permFields, permServices } = state.perms;
-  return { user, isLoggedIn , permFields, permServices};
+  return { user, isLoggedIn, permFields, permServices };
 };
 
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
 });
 
 export default connect(mapState, mapDispatch)(CompanyAddressesDataTable);
-

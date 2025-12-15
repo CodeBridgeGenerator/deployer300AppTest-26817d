@@ -46,8 +46,8 @@ const CompaniesPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedDelete, setSelectedDelete] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
   const [permissions, setPermissions] = useState({});
+  const [selectedUser, setSelectedUser] = useState();
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
 
@@ -85,6 +85,7 @@ const CompaniesPage = (props) => {
       setSelectedHideFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -215,8 +216,8 @@ const CompaniesPage = (props) => {
           setLoading(false);
           props.hide();
           console.log({ error });
-        }),
-      ),
+        })
+      )
     );
     props.hide();
     setLoading(false);
@@ -428,14 +429,14 @@ const CompaniesPage = (props) => {
 
     if (currentCache && selectedUser) {
       const selectedUserProfile = currentCache.profiles.find(
-        (profile) => profile.profileId === selectedUser,
+        (profile) => profile.profileId === selectedUser
       );
 
       if (selectedUserProfile) {
         const paginatorRecordsNo = _.get(
           selectedUserProfile,
           "preferences.settings.companies.paginatorRecordsNo",
-          10,
+          10
         );
         setPaginatorRecordsNo(paginatorRecordsNo);
         console.log("PaginatorRecordsNo from cache:", paginatorRecordsNo);
@@ -452,7 +453,7 @@ const CompaniesPage = (props) => {
       const paginatorRecordsNo = _.get(
         profileResponse,
         "preferences.settings.companies.paginatorRecordsNo",
-        10,
+        10
       );
       setPaginatorRecordsNo(paginatorRecordsNo);
       console.log("PaginatorRecordsNo from service:", paginatorRecordsNo);
@@ -471,14 +472,14 @@ const CompaniesPage = (props) => {
 
       if (currentCache && selectedUser) {
         const selectedUserProfileIndex = currentCache.profiles.findIndex(
-          (profile) => profile.profileId === selectedUser,
+          (profile) => profile.profileId === selectedUser
         );
 
         if (selectedUserProfileIndex !== -1) {
           _.set(
             currentCache.profiles[selectedUserProfileIndex],
             "preferences.settings.companies.paginatorRecordsNo",
-            paginatorRecordsNo,
+            paginatorRecordsNo
           );
 
           props.set(currentCache);
@@ -492,54 +493,6 @@ const CompaniesPage = (props) => {
     updateCache();
   }, [paginatorRecordsNo, selectedUser]);
 
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const companyPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "companies" },
-            });
-
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = companyPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = companyPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-          } else {
-            console.log("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
-    };
-
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
-
   return (
     <div className="mt-5">
       <div className="grid">
@@ -551,7 +504,7 @@ const CompaniesPage = (props) => {
           {permissions.read ? (
             <SplitButton
               model={menuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && items?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && items?.length === 0)
               )}
               dropdownIcon="pi pi-ellipsis-h"
               buttonClassName="hidden"
@@ -567,7 +520,7 @@ const CompaniesPage = (props) => {
             />{" "}
             <SplitButton
               model={filterMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
               )}
               dropdownIcon={
                 <img
@@ -581,7 +534,7 @@ const CompaniesPage = (props) => {
             ></SplitButton>
             <SplitButton
               model={sortMenuItems.filter(
-                (m) => !(m.icon === "pi pi-trash" && data?.length === 0),
+                (m) => !(m.icon === "pi pi-trash" && data?.length === 0)
               )}
               dropdownIcon={
                 <img
@@ -638,6 +591,7 @@ const CompaniesPage = (props) => {
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
             paginatorRecordsNo={paginatorRecordsNo}
+            filename={filename}
           />
         </div>
       </div>
@@ -700,6 +654,8 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
   get: () => dispatch.cache.get(),

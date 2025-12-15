@@ -52,6 +52,7 @@ const UserChangePasswordPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);

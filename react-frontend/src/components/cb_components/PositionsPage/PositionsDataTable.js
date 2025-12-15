@@ -1,6 +1,7 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import React, { useState, useRef, useEffect } from "react";
+import { connect } from "react-redux";
 import _ from "lodash";
 import { Button } from "primereact/button";
 
@@ -53,6 +54,9 @@ const PositionsDataTable = ({
   selectedUser,
   setPaginatorRecordsNo,
   paginatorRecordsNo,
+  hasServicePermission,
+  hasServiceFieldsPermission,
+  filename,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -222,80 +226,13 @@ const PositionsDataTable = ({
   useEffect(() => {
     const fetchPermissions = async () => {
       setIsLoadingPermissions(true);
-      try {
-        if (selectedUser) {
-          const profile = await client.service("profiles").get(selectedUser);
-          const positionsPermissions = await client
-            .service("permissionServices")
-            .find({
-              query: { service: "positions" },
-            });
-
-          let userPermissions = null;
-
-          // Priority 1: Profile
-          userPermissions = positionsPermissions.data.find(
-            (perm) => perm.profile === profile._id,
-          );
-
-          // Priority 2: Position
-          if (!userPermissions) {
-            userPermissions = positionsPermissions.data.find(
-              (perm) => perm.positionId === profile.position,
-            );
-          }
-
-          // Priority 3: Role
-          if (!userPermissions) {
-            userPermissions = positionsPermissions.data.find(
-              (perm) => perm.roleId === profile.role,
-            );
-          }
-
-          if (userPermissions) {
-            setPermissions(userPermissions);
-          } else {
-            console.log("No permissions found for this user and service.");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      } finally {
-        setIsLoadingPermissions(false);
-      }
+      const fieldPermissions = await hasServiceFieldsPermission(positions);
+      setIsLoadingPermissions(false);
+      setFieldPermissions(fieldPermissions);
     };
 
-    if (selectedUser) {
-      fetchPermissions();
-    }
-  }, [selectedUser]);
-
-  useEffect(() => {
-    const fetchFieldPermissions = async () => {
-      try {
-        const userPermissions = await client
-          .service("permissionFields")
-          .find({});
-        if (userPermissions?.data?.length === 0) return;
-        const filteredPermissions = userPermissions.data.filter(
-          (perm) =>
-            perm.servicePermissionId.roleId === selectedUser &&
-            perm.service === "positions",
-        );
-        if (filteredPermissions.length > 0) {
-          setFieldPermissions(filteredPermissions[0]);
-        }
-        // console.log("FieldPermissions", fieldPermissions);
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
-    };
-
-    // fetchFieldPermissions();
-    if (selectedUser) {
-      fetchFieldPermissions();
-    }
-  }, [selectedUser]);
+    fetchPermissions();
+  }, []);
 
   const handleMessage = () => {
     setShowDialog(true); // Open the dialog
@@ -837,4 +774,17 @@ const PositionsDataTable = ({
   );
 };
 
-export default PositionsDataTable;
+const mapState = (state) => {
+  const { user, isLoggedIn } = state.auth;
+  return { user, isLoggedIn };
+};
+
+const mapDispatch = (dispatch) => ({
+  alert: (data) => dispatch.toast.alert(data),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
+});
+
+export default connect(mapState, mapDispatch)(PositionsDataTable);

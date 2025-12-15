@@ -30,8 +30,8 @@ const InboxPage = (props) => {
   const [searchDialog, setSearchDialog] = useState(false);
   const [items, setItems] = useState([]);
   const [flaggedItems, setFlaggedItems] = useState([]);
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const urlParams = useParams();
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});  const urlParams = useParams();
 
   const currentUserId = props.user._id;
   const service = props.service || "common";
@@ -57,6 +57,7 @@ const InboxPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);

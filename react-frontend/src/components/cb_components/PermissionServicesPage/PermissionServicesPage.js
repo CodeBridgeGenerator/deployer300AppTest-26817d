@@ -41,10 +41,10 @@ const PermissionServicesPage = (props) => {
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});  const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
   const [selectedUser, setSelectedUser] = useState();
-  const [permissions, setPermissions] = useState({});
+
   const [refresh, setRefresh] = useState(false);
   const [triggerDownload, setTriggerDownload] = useState(false);
 
@@ -85,6 +85,7 @@ const PermissionServicesPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -534,6 +535,7 @@ const PermissionServicesPage = (props) => {
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
             paginatorRecordsNo={paginatorRecordsNo}
+            filename={filename}
           />
         </div>
       </div>
@@ -589,6 +591,8 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
   get: () => dispatch.cache.get(),

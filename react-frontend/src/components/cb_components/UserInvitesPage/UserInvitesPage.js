@@ -41,9 +41,9 @@ const UserInvitesPage = (props) => {
   const [triggerDownload, setTriggerDownload] = useState(false);
   const [isHelpSidebarVisible, setHelpSidebarVisible] = useState(false);
   const [initialData, setInitialData] = useState([]);
-  const [selectedDelete, setSelectedDelete] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
-  const [permissions, setPermissions] = useState({});
+  const [selectedDelete, setSelectedDelete] = useState([]);  
+const [permissions, setPermissions] = useState({});  const [selectedUser, setSelectedUser] = useState();
+
   const [refresh, setRefresh] = useState(false);
   const [paginatorRecordsNo, setPaginatorRecordsNo] = useState(10);
   const urlParams = useParams();
@@ -101,6 +101,7 @@ const UserInvitesPage = (props) => {
       setFields(_fields);
     };
     _getSchema();
+    props.hasServicePermission(filename).then(setPermissions);
     if (location?.state?.action === "create") {
       entityCreate(location, setRecord);
       setShowCreateDialog(true);
@@ -118,14 +119,19 @@ const UserInvitesPage = (props) => {
         query: {
           $limit: 10000,
           $sort: { emailToInvite: 1 },
-          positions: urlParams.singlePositionsId,
-          roles: urlParams.singleRolesId,
+          position: urlParams.singlePositionsId,
+          role: urlParams.singleRolesId,
           company: urlParams.singleCompaniesId,
           branch: urlParams.singleBranchesId,
           $populate: [
             {
-              path: "positions",
+              path: "position",
               service: "positions",
+              select: ["name"],
+            },
+            {
+              path: "role",
+              service: "roles",
               select: ["name"],
             },
             {
@@ -496,6 +502,7 @@ const UserInvitesPage = (props) => {
             selectedUser={selectedUser}
             setPaginatorRecordsNo={setPaginatorRecordsNo}
             paginatorRecordsNo={paginatorRecordsNo}
+            filename={filename}
           />
         </div>
       </div>
@@ -574,6 +581,8 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+  hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
   get: () => dispatch.cache.get(),
