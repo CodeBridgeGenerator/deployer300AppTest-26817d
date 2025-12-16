@@ -9,7 +9,9 @@ const MailsPage = (props) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-
+  const [permissions, setPermissions] = useState({});
+  const filename = "mails";
+  
   useEffect(() => {
     //on mount
     setLoading(true);
@@ -29,6 +31,7 @@ const MailsPage = (props) => {
       })
       .then((res) => {
         let results = res.data;
+        props.hasServicePermission(filename).then(setPermissions);
         setData(results);
         setLoading(false);
       })
@@ -66,6 +69,9 @@ const MailsPage = (props) => {
             items={data}
             onRowClick={onRowClick}
             loading={loading}
+                        filename={filename}
+            hasServiceFieldsPermission={props.hasServiceFieldsPermission}
+            hasServicePermission={props.hasServicePermission}
           />
         </div>
       </div>
@@ -79,6 +85,10 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => ({
   alert: (data) => dispatch.toast.alert(data),
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
+    hasServicePermission: (service) =>
+    dispatch.perms.hasServicePermission(service),
+  hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
 });
 
 export default connect(mapState, mapDispatch)(MailsPage);

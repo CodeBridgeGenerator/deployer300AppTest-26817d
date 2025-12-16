@@ -57,7 +57,7 @@ const AppSideBar = (props) => {
       <div
         className={classNames(
           "duration-300 flex-shrink-0",
-          open ? "w-[280px]" : "w-[calc(3rem+20px)]",
+          open ? "w-[280px]" : "w-[calc(3rem+20px)]"
         )}
       ></div>
       <AppSideBarProvider
@@ -71,7 +71,7 @@ const AppSideBar = (props) => {
         <div
           className={classNames(
             "fixed z-[100] flex flex-col top-20 left-0 h-[calc(100vh-5rem)] overflow-y-hidden overflow-x-hidden  flex-shrink-0 shadow bg-[#F8F9FA] border-r border-[#DEE2E6] border-solid duration-300",
-            open ? "w-[280px]" : "w-[calc(3rem+20px)]",
+            open ? "w-[280px]" : "w-[calc(3rem+20px)]"
           )}
         >
           <div className="flex-grow gap-1 p-2 overflow-x-hidden overflow-y-auto no-scrollbar">
@@ -186,20 +186,14 @@ const AppSideBar = (props) => {
                   menuKey: "office",
                   menus: [
                     {
-                      icon: <DepartmentAdmin />,
-                      label: "Department Admins",
-                      menuKey: "department-admin",
-                      to: "/cbAdmin/departmentAdmin",
-                    },
-                    {
                       icon: <HeadOfDept />,
-                      label: "Head of departments",
+                      label: "Head of Departments",
                       menuKey: "head-of-department",
                       to: "/cbAdmin/departmentHOD",
                     },
                     {
                       icon: <HeadOfSection />,
-                      label: "Head of sections",
+                      label: "Head of Sections",
                       menuKey: "haed-of-section",
                       to: "/cbAdmin/departmentHOS",
                     },
@@ -216,10 +210,22 @@ const AppSideBar = (props) => {
                       to: "/cbAdmin/employees",
                     },
                     {
-                      label: "Staff info",
+                      label: "Staff Details",
                       icon: <StaffInfo />,
                       menuKey: "staff-info",
                       to: "/cbAdmin/staffinfo",
+                    },
+                    {
+                      icon: <DepartmentAdmin />,
+                      label: "Department Admins",
+                      menuKey: "department-admin",
+                      to: "/cbAdmin/departmentAdmin",
+                    },
+                    {
+                      label: "Departments",
+                      icon: <Positions />,
+                      menuKey: "departments",
+                      to: "/cbAdmin/departments",
                     },
                   ],
                 },
@@ -435,7 +441,7 @@ const AppSideBar = (props) => {
           <div
             className={classNames(
               "text-center duration-300",
-              open ? "opacity-100" : "opacity-0",
+              open ? "opacity-100" : "opacity-0"
             )}
           >
             <AppFooter />

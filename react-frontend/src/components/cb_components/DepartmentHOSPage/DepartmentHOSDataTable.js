@@ -17,6 +17,7 @@ import CopyIcon from "../../../assets/media/Clipboard.png";
 import DuplicateIcon from "../../../assets/media/Duplicate.png";
 import DeleteIcon from "../../../assets/media/Trash.png";
 import { Checkbox } from "primereact/checkbox";
+import { Skeleton } from "primereact/skeleton";
 
 const DepartmentHOSDataTable = ({
   items,
@@ -43,6 +44,9 @@ const DepartmentHOSDataTable = ({
   selectedDelete,
   setSelectedDelete,
   onCreateResult,
+    filename,
+  hasServiceFieldsPermission,
+  hasServicePermission,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();
@@ -50,6 +54,24 @@ const DepartmentHOSDataTable = ({
   const [selectedItems, setSelectedItems] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [data, setData] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [fieldPermissions, setFieldPermissions] = useState({});
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+    const fetchServicePermissions = async () => {
+      setIsLoadingPermissions(true);
+      const servicePermissions = await hasServicePermission(filename);
+      const fieldPermissions = await hasServiceFieldsPermission(filename);
+      setIsLoadingPermissions(false);
+      setPermissions(servicePermissions);
+      setFieldPermissions(fieldPermissions);
+      console.log("Service Permissions:", servicePermissions);
+      console.log("Field Permissions:", fieldPermissions);
+    };
+  
+    useEffect(() => {
+      fetchServicePermissions();
+    }, []);
 
   const dropdownTemplate0 = (rowData, { rowIndex }) => (
     <p>{rowData.departmentId?.name}</p>
@@ -122,8 +144,27 @@ const DepartmentHOSDataTable = ({
     setShowDialog(false); // Close the dialog
   };
 
+  const renderSkeleton = () => {
+    return (
+      <DataTable
+        value={Array.from({ length: 5 })}
+        className="p-datatable-striped"
+      >
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+      </DataTable>
+    );
+  };
+
   return (
     <>
+      {isLoadingPermissions ? (
+        renderSkeleton()
+      ) : permissions.read ? (
+        <>
       <DataTable
         value={items}
         ref={dt}
@@ -424,6 +465,9 @@ const DepartmentHOSDataTable = ({
         ></Button>
       </Dialog>
     </>
+      ) : (<div>You do not have permission to view this data.</div>
+      )} 
+    </> 
   );
 };
 

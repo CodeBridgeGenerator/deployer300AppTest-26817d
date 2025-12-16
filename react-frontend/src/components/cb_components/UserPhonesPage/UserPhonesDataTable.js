@@ -1,6 +1,6 @@
+import React, { useState, useRef, useEffect } from "react";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useState, useRef, useEffect } from "react";
 import _ from "lodash";
 import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
@@ -57,6 +57,7 @@ const UserPhonesDataTable = ({
   const [permissions, setPermissions] = useState({});
   const [fieldPermissions, setFieldPermissions] = useState({});
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
   const fetchServicePermissions = async () => {
     setIsLoadingPermissions(true);
     const servicePermissions = await hasServicePermission(filename);

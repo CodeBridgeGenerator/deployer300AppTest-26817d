@@ -1,13 +1,34 @@
-import React, { useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { useRef, useState, useEffect } from "react";
+import { useParams, } from "react-router-dom";
 import _ from "lodash";
 import moment from "moment";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { Skeleton } from "primereact/skeleton";
 
-const JobQuesDataTable = ({ items }) => {
+const JobQuesDataTable = ({ items ,  filename,
+  hasServiceFieldsPermission,
+  hasServicePermission,}) => {
   const dt = useRef(null);
   const urlParams = useParams();
+ const [permissions, setPermissions] = useState({});
+  const [fieldPermissions, setFieldPermissions] = useState({});
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, []);
 
   const pTemplate0 = (rowData, { rowIndex }) => <p>{rowData.name}</p>;
   const pTemplate1 = (rowData, { rowIndex }) => <p>{rowData.type}</p>;
@@ -24,8 +45,27 @@ const JobQuesDataTable = ({ items }) => {
     <p>{moment(rowData.createdAt).fromNow()}</p>
   );
 
+const renderSkeleton = () => {
+    return (
+      <DataTable
+        value={Array.from({ length: 5 })}
+        className="p-datatable-striped"
+      >
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+        <Column body={<Skeleton />} />
+      </DataTable>
+    );
+  };
+
   return (
     <>
+      {isLoadingPermissions ? (
+        renderSkeleton()
+      ) : permissions.read ? (
+        <>
       <DataTable
         value={items}
         ref={dt}
@@ -93,6 +133,9 @@ const JobQuesDataTable = ({ items }) => {
         />
       </DataTable>
     </>
+      ) : (<p>You do not have permission to view this data.</p>
+      )}
+    </> 
   );
 };
 

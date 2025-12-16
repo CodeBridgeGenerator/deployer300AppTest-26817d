@@ -44,6 +44,9 @@ const DepartmentAdminDataTable = ({
   selectedDelete,
   setSelectedDelete,
   onCreateResult,
+    filename,
+  hasServiceFieldsPermission,
+  hasServicePermission,
 }) => {
   const dt = useRef(null);
   const urlParams = useParams();

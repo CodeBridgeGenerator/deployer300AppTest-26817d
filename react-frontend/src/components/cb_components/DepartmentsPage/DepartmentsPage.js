@@ -442,6 +442,9 @@ const DepartmentsPage = (props) => {
             selectedDelete={selectedDelete}
             setSelectedDelete={setSelectedDelete}
             onCreateResult={onCreateResult}
+            fileName={filename}
+            hasServiceFieldsPermission={props.hasServiceFieldsPermission} 
+            hasServicePermission={props.hasServicePermission}
           />
         </div>
       </div>
@@ -514,6 +517,8 @@ const mapDispatch = (dispatch) => ({
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
   hasServicePermission: (service) =>
     dispatch.perms.hasServicePermission(service),
+    hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
 });

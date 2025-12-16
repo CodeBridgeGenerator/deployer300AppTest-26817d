@@ -1,14 +1,36 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import _ from "lodash";
 import { useParams } from "react-router-dom";
 import moment from "moment";
 import { Chip } from "primereact/chip";
+import { Skeleton } from "primereact/skeleton";
 
-const MailQuesDataTable = ({ items, onRowClick, loading }) => {
+const MailQuesDataTable = ({ items, onRowClick, loading,   filename,
+  hasServiceFieldsPermission,
+  hasServicePermission, }) => {
   const dt = useRef(null);
   const urlParams = useParams();
+const [permissions, setPermissions] = useState({});
+  const [fieldPermissions, setFieldPermissions] = useState({});
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+
+  const fetchServicePermissions = async () => {
+    setIsLoadingPermissions(true);
+    const servicePermissions = await hasServicePermission(filename);
+    const fieldPermissions = await hasServiceFieldsPermission(filename);
+    setIsLoadingPermissions(false);
+    setPermissions(servicePermissions);
+    setFieldPermissions(fieldPermissions);
+    console.log("Service Permissions:", servicePermissions);
+    console.log("Field Permissions:", fieldPermissions);
+  };
+
+  useEffect(() => {
+    fetchServicePermissions();
+  }, []);
+
 
   const pTemplate0 = (rowData, { rowIndex }) => <p>{rowData.name}</p>;
   const pTemplate1 = (rowData, { rowIndex }) => <p>{rowData.from}</p>;
@@ -35,7 +57,27 @@ const MailQuesDataTable = ({ items, onRowClick, loading }) => {
     <p>{moment(rowData.createdAt).fromNow()}</p>
   );
 
-  return (
+ const renderSkeleton = () => {
+     return (
+       <DataTable
+         value={Array.from({ length: 5 })}
+         className="p-datatable-striped"
+       >
+         <Column body={<Skeleton />} />
+         <Column body={<Skeleton />} />
+         <Column body={<Skeleton />} />
+         <Column body={<Skeleton />} />
+         <Column body={<Skeleton />} />
+       </DataTable>
+     );
+   };
+ 
+   return (
+     <>
+       {isLoadingPermissions ? (
+         renderSkeleton()
+       ) : permissions.read ? (
+         <>
     <DataTable
       value={items}
       ref={dt}
@@ -124,6 +166,11 @@ const MailQuesDataTable = ({ items, onRowClick, loading }) => {
         style={{ minWidth: "8rem" }}
       />
     </DataTable>
+  );
+      </>  ) : (
+        <p>You do not have permission to view this data.</p>
+      )}
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { connect } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import _ from "lodash";
@@ -45,6 +45,8 @@ const DepartmentHODPage = (props) => {
   const [selectedSortOption, setSelectedSortOption] = useState("");
   const [selectedDelete, setSelectedDelete] = useState([]);
   const [permissions, setPermissions] = useState({});
+    const helpSidebarRef = useRef(null);
+
   const toggleHelpSidebar = () => {
     setHelpSidebarVisible(!isHelpSidebarVisible);
   };
@@ -448,6 +450,9 @@ const DepartmentHODPage = (props) => {
             selectedDelete={selectedDelete}
             setSelectedDelete={setSelectedDelete}
             onCreateResult={onCreateResult}
+                        filename={filename}
+            hasServiceFieldsPermission={props.hasServiceFieldsPermission}
+            hasServicePermission={props.hasServicePermission}
           />
         </div>
       </div>
@@ -520,6 +525,8 @@ const mapDispatch = (dispatch) => ({
   getSchema: (serviceName) => dispatch.db.getSchema(serviceName),
   hasServicePermission: (service) =>
     dispatch.perms.hasServicePermission(service),
+    hasServiceFieldsPermission: (service) =>
+    dispatch.perms.hasServiceFieldsPermission(service),
   show: () => dispatch.loading.show(),
   hide: () => dispatch.loading.hide(),
 });

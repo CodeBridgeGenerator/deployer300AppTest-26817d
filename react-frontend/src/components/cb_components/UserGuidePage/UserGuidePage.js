@@ -372,7 +372,7 @@ const UserGuidePage = (props) => {
       <div className="grid">
         <div className="col-6 flex align-items-center justify-content-start">
           <h4 className="mb-0 ml-2">
-            <span> AIMS / </span>
+            <span> App / </span>
             <strong>UserGuide </strong>
           </h4>
           <SplitButton
