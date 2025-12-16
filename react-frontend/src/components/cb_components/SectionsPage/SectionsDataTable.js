@@ -221,20 +221,7 @@ const SectionsDataTable = ({
 
   useEffect(() => {
     const fetchFieldPermissions = async () => {
-      try {
-        const userPermissions = await client.service("permissionFields").find();
-        const filteredPermissions = userPermissions.data.filter(
-          (perm) =>
-            perm.servicePermissionId.roleId === selectedUser &&
-            perm.service === "sections",
-        );
-        if (filteredPermissions.length > 0) {
-          setFieldPermissions(filteredPermissions[0]);
-        }
-        console.log("FieldPermissions", fieldPermissions);
-      } catch (error) {
-        console.error("Failed to fetch permissions", error);
-      }
+      
     };
 
     fetchFieldPermissions();

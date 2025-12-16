@@ -64,6 +64,7 @@ const PermissionServicesDataTable = ({
   const [fieldPermissions, setFieldPermissions] = useState({});
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
+  const toast = useRef(null);
   const header = (
     <div
       className="table-header"
@@ -209,15 +210,15 @@ const PermissionServicesDataTable = ({
   // Separate items by category
   const groupedRoleItems = groupItems(
     items.filter((item) => item.roleId),
-    "roleId.name",
+    "roleId.name"
   );
   const groupedPositionItems = groupItems(
     items.filter((item) => item.positionId),
-    "positionId.name",
+    "positionId.name"
   );
   const groupedProfileItems = groupItems(
     items.filter((item) => item.profile),
-    "profile.name",
+    "profile.name"
   );
 
   const renderSkeleton = () => {
@@ -240,7 +241,7 @@ const PermissionServicesDataTable = ({
     groupedItems,
     groupField,
     groupHeaderTemplate,
-    extraColumn,
+    extraColumn
   ) => (
     <>
       {isLoadingPermissions ? (
@@ -707,7 +708,7 @@ const PermissionServicesDataTable = ({
               field: "roleId.name",
               header: "Role",
               body: (rowData) => <p>{rowData.roleId?.name}</p>,
-            },
+            }
           )}
         </TabPanel>
         <TabPanel header="Positions">
@@ -719,7 +720,7 @@ const PermissionServicesDataTable = ({
               field: "positionId.name",
               header: "Position",
               body: (rowData) => <p>{rowData.positionId?.name}</p>,
-            },
+            }
           )}
         </TabPanel>
         <TabPanel header="Profiles">
@@ -731,7 +732,7 @@ const PermissionServicesDataTable = ({
               field: "profile.name",
               header: "Profile",
               body: (rowData) => <p>{rowData.profile?.name}</p>,
-            },
+            }
           )}
         </TabPanel>
       </TabView>
